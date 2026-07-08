@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-
+console.log("Auth JS Loaded");
+console.log(window.supabase);
+console.log(supabase);
     const form = document.getElementById("loginForm");
     const message = document.getElementById("message");
 
