@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>24x7.work — Building ONEID, in the open</title>
+<meta name="description" content="24x7.work is building ONEID, an enterprise ERP platform. Follow the build: Core, HRMS & Payroll, and CRM & Service are live." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F3F5F9;
+    --panel: #FFFFFF;
+    --ink: #10192E;
+    --slate: #5B6579;
+    --line: #DEE3ED;
+    --indigo: #33409E;
+    --indigo-deep: #232C73;
+    --amber: #E1963B;
+    --amber-soft: #FBEBD4;
+    --indigo-soft: #E7E9F7;
+    --green: #1E8E6F;
+    --display: "Space Grotesk", sans-serif;
+    --body: "Inter", -apple-system, sans-serif;
+    --mono: "JetBrains Mono", Menlo, monospace;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family: var(--body); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color: inherit; }
+  .wrap{ max-width: 1040px; margin:0 auto; padding: 0 20px; }
+
+  /* ---------- NAV ---------- */
+  nav.top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 20px; max-width:1040px; margin:0 auto;
+  }
+  .brand{
+    font-family: var(--display); font-weight:700; font-size:17px;
+    letter-spacing:-0.02em; display:flex; align-items:center; gap:8px;
+  }
+  .brand .dot{ width:8px; height:8px; border-radius:50%; background:var(--amber); }
+  .navlinks{ display:flex; gap:22px; font-size:13.5px; color:var(--slate); font-weight:500; }
+  .navlinks a:hover{ color:var(--ink); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding: 30px 0 46px;
+  }
+  .hero-grid{
+    display:grid; grid-template-columns: 1fr; gap: 30px;
+    align-items:center;
+  }
+  @media(min-width:760px){
+    .hero-grid{ grid-template-columns: 1.15fr 0.85fr; gap:40px; }
+  }
+  .eyebrow{
+    font-family: var(--mono); font-size:11.5px; letter-spacing:0.12em;
+    text-transform:uppercase; color: var(--indigo); font-weight:600;
+    background: var(--indigo-soft); display:inline-block;
+    padding: 5px 10px; border-radius:6px; margin-bottom:16px;
+  }
+  h1{
+    font-family: var(--display); font-size: clamp(30px, 6vw, 44px);
+    line-height:1.08; letter-spacing:-0.02em; margin:0 0 16px;
+  }
+  h1 em{ font-style:normal; color: var(--indigo); }
+  .hero p.lead{
+    font-size: 15.5px; color: var(--slate); max-width:480px; margin:0 0 22px;
+  }
+  .hero-ctas{ display:flex; gap:12px; flex-wrap:wrap; }
+  .btn{
+    font-family: var(--body); font-weight:600; font-size:14px;
+    padding: 11px 20px; border-radius:9px; text-decoration:none;
+    display:inline-block;
+  }
+  .btn.primary{ background: var(--indigo); color:#fff; }
+  .btn.ghost{ background: var(--panel); color:var(--ink); border:1px solid var(--line); }
+
+  /* ---------- DIAL ---------- */
+  .dial-card{
+    background: var(--panel); border:1px solid var(--line); border-radius:18px;
+    padding: 22px; text-align:center;
+  }
+  .dial-card .cap{
+    font-family: var(--mono); font-size:11px; color:var(--slate);
+    letter-spacing:0.08em; text-transform:uppercase; margin-bottom: 6px;
+  }
+  .dial-card .sub{ font-size:12px; color:var(--slate); margin-top:8px; }
+  svg#dial{ width: 220px; height:220px; }
+  .legend{ display:flex; justify-content:center; gap:16px; margin-top:14px; flex-wrap:wrap; }
+  .legend span{ font-size:11.5px; color:var(--slate); display:flex; align-items:center; gap:6px; }
+  .legend i{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+
+  /* ---------- STAT BAR ---------- */
+  .statbar{
+    display:grid; grid-template-columns: repeat(3,1fr); gap:1px;
+    background: var(--line); border:1px solid var(--line); border-radius:14px;
+    overflow:hidden; margin: 6px 0 54px;
+  }
+  .statbar .cell{ background:var(--panel); padding:18px 14px; text-align:center; }
+  .statbar .num{ font-family:var(--mono); font-weight:600; font-size:24px; color:var(--indigo-deep); }
+  .statbar .lbl{ font-size:11.5px; color:var(--slate); margin-top:4px; }
+
+  /* ---------- SECTION HEADS ---------- */
+  .sec-head{ margin-bottom: 26px; }
+  .sec-head .eyebrow{ margin-bottom:10px; }
+  .sec-head h2{
+    font-family: var(--display); font-size: 24px; letter-spacing:-0.01em; margin:0 0 8px;
+  }
+  .sec-head p{ color:var(--slate); font-size:14px; max-width:520px; margin:0; }
+
+  section{ padding: 10px 0 54px; }
+
+  /* ---------- MODULES ---------- */
+  .modules{ display:flex; flex-direction:column; gap:10px; }
+  .module{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:16px 18px; display:flex; align-items:center; gap:14px;
+  }
+  .module .mnum{
+    font-family:var(--mono); font-size:11px; color:var(--slate); min-width:64px;
+  }
+  .module .mname{ font-weight:600; font-size:14.5px; flex:1; }
+  .module .mtables{ font-family:var(--mono); font-size:12.5px; color:var(--slate); }
+  .pill{
+    font-family:var(--mono); font-size:10.5px; font-weight:600; padding:4px 9px;
+    border-radius:20px; text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .pill.live{ background:#E4F5EF; color:var(--green); }
+  .pill.next{ background:var(--amber-soft); color:#9C6A1E; }
+  .pill.later{ background:#EEF0F4; color:#8A93A6; }
+  .module.dim{ opacity:0.55; }
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{ display:grid; grid-template-columns:1fr; gap:18px; }
+  @media(min-width:760px){ .about-grid{ grid-template-columns: repeat(3,1fr); } }
+  .about-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px;
+  }
+  .about-card h3{ font-family:var(--display); font-size:15.5px; margin:0 0 6px; }
+  .about-card p{ font-size:13px; color:var(--slate); margin:0; }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--line); padding: 26px 0 40px;
+    font-size:12.5px; color:var(--slate);
+  }
+  footer .foot-row{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  footer a{ color:var(--slate); text-decoration:none; }
+  footer a:hover{ color:var(--indigo); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="brand"><span class="dot"></span>24x7.work</div>
+  <div class="navlinks">
+    <a href="#modules">Modules</a>
+    <a href="#about">About</a>
+    <a href="mailto:hello@24x7.work">Contact</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Enterprise ERP · Built in the open</div>
+        <h1>An ERP built <em>module by module</em>,<br>and shipped as it's proven.</h1>
+        <p class="lead">
+          ONEID is an enterprise resource planning platform from 24x7.work.
+          Every module goes live only after its schema, integrity checks and
+          staging tests pass — no module ships half-built.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn primary" href="#modules">See what's live</a>
+          <a class="btn ghost" href="mailto:hello@24x7.work">Get in touch</a>
+        </div>
+      </div>
+
+      <div class="dial-card">
+        <div class="cap">Build progress · 100 / 220 migrations</div>
+        <svg id="dial" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="82" fill="none" stroke="#EEF0F4" stroke-width="20"/>
+          <!-- Ring = 220 planned migrations. Core=66, HRMS=19, CRM=15 (086-100) = 100 done.
+               Circumference = 2*pi*82 = 515.22 -->
+          <g transform="rotate(-90 100 100)">
+            <circle cx="100" cy="100" r="82" fill="none" stroke="#33409E" stroke-width="20"
+                    stroke-dasharray="154.57 515.22" stroke-dashoffset="0" stroke-linecap="round"/>
+            <circle cx="100" cy="100" r="82" fill="none" stroke="#6C79C9" stroke-width="20"
+                    stroke-dasharray="44.51 515.22" stroke-dashoffset="-154.57" stroke-linecap="round"/>
+            <circle cx="100" cy="100" r="82" fill="none" stroke="#E1963B" stroke-width="20"
+                    stroke-dasharray="35.13 515.22" stroke-dashoffset="-199.08" stroke-linecap="round"/>
+          </g>
+          <text x="100" y="94" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="30" fill="#10192E">100</text>
+          <text x="100" y="116" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5B6579">migrations live</text>
+        </svg>
+        <div class="legend">
+          <span><i style="background:#33409E"></i>Core (001–066)</span>
+          <span><i style="background:#6C79C9"></i>HRMS (067–085)</span>
+          <span><i style="background:#E1963B"></i>CRM (086–100)</span>
+        </div>
+        <div class="sub">102 tables · Migrations 001–100 · v1.2.0</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="statbar">
+    <div class="cell"><div class="num">102</div><div class="lbl">Tables live</div></div>
+    <div class="cell"><div class="num">100</div><div class="lbl">Migrations shipped</div></div>
+    <div class="cell"><div class="num">3</div><div class="lbl">Modules complete</div></div>
+  </div>
+
+  <section id="modules">
+    <div class="sec-head">
+      <div class="eyebrow">Roadmap</div>
+      <h2>What's live, what's next</h2>
+      <p>Each module is deployed and integration-tested before the next one starts. This is the real, current status — not a projection.</p>
+    </div>
+    <div class="modules">
+      <div class="module">
+        <div class="mnum">001–066</div>
+        <div class="mname">Core ERP Foundation</div>
+        <div class="mtables">66 tables</div>
+        <span class="pill live">Live</span>
+      </div>
+      <div class="module">
+        <div class="mnum">067–085</div>
+        <div class="mname">HRMS &amp; Payroll</div>
+        <div class="mtables">19 tables</div>
+        <span class="pill live">Live</span>
+      </div>
+      <div class="module">
+        <div class="mnum">086–100</div>
+        <div class="mname">CRM &amp; Service</div>
+        <div class="mtables">17 tables</div>
+        <span class="pill live">Live</span>
+      </div>
+      <div class="module dim">
+        <div class="mnum">101–115</div>
+        <div class="mname">Projects &amp; Assets</div>
+        <div class="mtables">planned</div>
+        <span class="pill next">Next</span>
+      </div>
+      <div class="module dim">
+        <div class="mnum">116–130</div>
+        <div class="mname">Logistics</div>
+        <div class="mtables">planned</div>
+        <span class="pill later">Later</span>
+      </div>
+      <div class="module dim">
+        <div class="mnum">131–220</div>
+        <div class="mname">Workflow, Analytics &amp; AI, Security, Platform APIs, Industry Plug-ins</div>
+        <div class="mtables">planned</div>
+        <span class="pill later">Later</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="sec-head">
+      <div class="eyebrow">About</div>
+      <h2>Why 24x7.work</h2>
+      <p>ONEID exists because most ERPs make you adopt their process. This one is built to fit the business, one verified module at a time.</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>Verified before it ships</h3>
+        <p>Every module is schema-checked, foreign-key validated and staging-tested against a real database before it's marked live.</p>
+      </div>
+      <div class="about-card">
+        <h3>Built for one org, then every org</h3>
+        <p>Multi-tenant from the first migration — every table carries an organization boundary from day one.</p>
+      </div>
+      <div class="about-card">
+        <h3>Transparent progress</h3>
+        <p>The dial above isn't marketing — it's the same migration count tracked in the engineering repository.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap foot-row">
+    <div>© 2026 24x7.work — ONEID Enterprise ERP</div>
+    <div>
+      <a href="mailto:hello@24x7.work">hello@24x7.work</a> ·
+      <a href="/staging.html">Engineering console</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

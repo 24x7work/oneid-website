@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Engineering Console — 24x7.work / ONEID</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F3F5F9;
+    --panel: #FFFFFF;
+    --ink: #10192E;
+    --slate: #5B6579;
+    --faint: #93A0B4;
+    --line: #DEE3ED;
+    --indigo: #33409E;
+    --indigo-deep: #232C73;
+    --indigo-soft: #E7E9F7;
+    --amber: #E1963B;
+    --amber-soft: #FBEBD4;
+    --pass: #1E8E6F;
+    --pass-bg: #E4F5EF;
+    --fail: #C13B3B;
+    --fail-bg: #FBEAEA;
+    --pending: #9C6A1E;
+    --pending-bg: #FBEBD4;
+    --idle-bg: #EEF0F4;
+    --display: "Space Grotesk", sans-serif;
+    --body: "Inter", -apple-system, sans-serif;
+    --mono: "JetBrains Mono", Menlo, monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 18px; }
+
+  nav.top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px; max-width:760px; margin:0 auto;
+  }
+  .brand{ font-family:var(--display); font-weight:700; font-size:16px; display:flex; align-items:center; gap:8px; }
+  .brand .dot{ width:8px; height:8px; border-radius:50%; background:var(--amber); }
+  nav.top a.back{ font-size:13px; color:var(--slate); text-decoration:none; }
+  nav.top a.back:hover{ color:var(--indigo); }
+
+  header.consolehead{
+    padding: 6px 0 22px;
+  }
+  .eyebrow{
+    font-family: var(--mono); font-size: 11px; letter-spacing:0.1em;
+    text-transform:uppercase; color: var(--indigo); font-weight:600;
+    background: var(--indigo-soft); display:inline-block;
+    padding: 5px 10px; border-radius:6px; margin-bottom:12px;
+  }
+  h1{ font-family:var(--display); font-size:22px; margin:0 0 10px; letter-spacing:-0.01em; }
+  .conn-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:12px 14px; font-family:var(--mono); font-size:11.5px; color:var(--slate);
+    display:flex; flex-wrap:wrap; gap:8px 18px;
+  }
+  .conn-card b{ color:var(--ink); }
+  .dotstatus{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--faint); margin-right:6px; }
+  .dotstatus.ok{ background:#2FBE8F; }
+  .dotstatus.bad{ background:#E4635F; }
+
+  .summary{ display:flex; gap:10px; margin: 18px 0; }
+  .summary .chip{
+    flex:1; background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:10px 12px; text-align:center;
+  }
+  .summary .chip .n{ font-family:var(--mono); font-size:20px; font-weight:700; }
+  .summary .chip .l{ font-size:10.5px; color:var(--slate); text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
+  .summary .chip.pass .n{ color:var(--pass); }
+  .summary .chip.fail .n{ color:var(--fail); }
+  .summary .chip.pending .n{ color:var(--pending); }
+
+  .runall{
+    display:block; width:100%; padding:13px; margin-bottom:18px;
+    background: var(--indigo); color:#fff; border:none; border-radius:10px;
+    font-family:var(--body); font-size:14.5px; font-weight:600;
+  }
+  .runall:active{ opacity:0.85; }
+
+  .test{ background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-bottom:10px; overflow:hidden; }
+  .test-head{ display:flex; align-items:flex-start; gap:12px; padding:13px 14px; }
+  .num{
+    font-family:var(--mono); font-size:12px; font-weight:700; color:var(--indigo);
+    background:var(--indigo-soft); width:26px; height:26px; min-width:26px;
+    border-radius:7px; display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .test-body{ flex:1; min-width:0; }
+  .test-title{ font-family:var(--display); font-size:14.5px; font-weight:600; margin-bottom:2px; }
+  .test-desc{ font-size:12px; color:var(--slate); line-height:1.4; }
+  .test-actions{ display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .run-btn{
+    font-family:var(--body); font-size:12.5px; font-weight:600; padding:7px 13px;
+    border-radius:7px; border:1px solid var(--indigo); background:#fff; color:var(--indigo);
+  }
+  .run-btn:active{ background:var(--indigo-soft); }
+  .status{
+    font-family:var(--mono); font-size:11px; font-weight:700; padding:5px 10px;
+    border-radius:6px; text-transform:uppercase; letter-spacing:0.04em;
+    background:var(--idle-bg); color:var(--faint);
+  }
+  .status.pass{ background:var(--pass-bg); color:var(--pass); }
+  .status.fail{ background:var(--fail-bg); color:var(--fail); }
+  .status.running{ background:var(--pending-bg); color:var(--pending); }
+
+  .log{
+    font-family:var(--mono); font-size:11px; color:var(--slate);
+    background:#F7F8FB; border-top:1px solid var(--line);
+    padding:10px 14px; white-space:pre-wrap; word-break:break-word;
+    display:none; max-height:220px; overflow-y:auto;
+  }
+  .log.show{ display:block; }
+  .log .ok-line{ color:var(--pass); }
+  .log .err-line{ color:var(--fail); }
+
+  footer{
+    max-width:760px; margin:22px auto 0; padding:16px 18px 40px;
+    font-size:11.5px; color:var(--faint); font-family:var(--mono); line-height:1.6;
+    border-top:1px solid var(--line);
+  }
+
+  /* ---------- PASSWORD GATE ---------- */
+  #gate{
+    position:fixed; inset:0; background:var(--paper); z-index:50;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  #gate .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:26px 22px; max-width:340px; width:100%; text-align:center;
+  }
+  #gate .brandline{
+    font-family:var(--display); font-weight:700; font-size:15px;
+    display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:14px;
+  }
+  #gate .brandline .dot{ width:8px; height:8px; border-radius:50%; background:var(--amber); }
+  #gate h2{ font-family:var(--display); font-size:16.5px; margin:0 0 6px; }
+  #gate p{ font-size:12.5px; color:var(--slate); margin:0 0 16px; }
+  #gate input{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
+    font-family:var(--mono); font-size:14px; margin-bottom:10px; text-align:center;
+    outline:none;
+  }
+  #gate input:focus{ border-color:var(--indigo); }
+  #gate button{
+    width:100%; padding:11px; border-radius:8px; border:none;
+    background:var(--indigo); color:#fff; font-family:var(--body);
+    font-weight:600; font-size:14px;
+  }
+  #gate button:active{ opacity:0.85; }
+  #gate .err{ color:var(--fail); font-size:12px; margin-top:10px; display:none; }
+  #gate .note{ font-family:var(--mono); font-size:10px; color:var(--faint); margin-top:16px; line-height:1.5; }
+  #appRoot{ display:none; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="card">
+    <div class="brandline"><span class="dot"></span>24x7.work</div>
+    <h2>Engineering Console</h2>
+    <p>Internal staging tool. Enter the access code to continue.</p>
+    <input type="password" id="gatePw" placeholder="Access code" autocomplete="off" />
+    <button id="gateBtn">Unlock</button>
+    <div class="err" id="gateErr">Incorrect code — try again.</div>
+    <div class="note">Basic access gate only — not a security boundary.<br>Real protection is the RLS policies in Supabase.</div>
+  </div>
+</div>
+
+<div id="appRoot">
+
+<nav class="top">
+  <div class="brand"><span class="dot"></span>24x7.work</div>
+  <a class="back" href="/index.html">← Back to site</a>
+</nav>
+
+<div class="wrap">
+  <header class="consolehead">
+    <div class="eyebrow">Internal · Phase-1 Integration Test · Migrations 001–100</div>
+    <h1>Engineering Console</h1>
+    <div class="conn-card">
+      <span><span class="dotstatus" id="connDot"></span><b>Supabase:</b> <span id="urlLabel">not set</span></span>
+      <span><b>Key type:</b> publishable (RLS-scoped, safe for browser)</span>
+    </div>
+  </header>
+
+  <div class="summary">
+    <div class="chip pass"><div class="n" id="passCount">0</div><div class="l">Passed</div></div>
+    <div class="chip fail"><div class="n" id="failCount">0</div><div class="l">Failed</div></div>
+    <div class="chip pending"><div class="n" id="pendingCount">12</div><div class="l">Pending</div></div>
+  </div>
+
+  <button class="runall" id="runAllBtn">Run all 12 tests in sequence</button>
+
+  <div id="testList"></div>
+</div>
+
+<footer>
+  This page is not linked from primary navigation — it is an internal
+  staging tool. It uses the Supabase publishable key only; no secret key
+  is ever entered here. RLS must have the temporary staging policies
+  applied (001_enable_staging_test_policies.sql) or every test below
+  will fail with a permission error. Revoke them with
+  002_revoke_staging_test_policies.sql once testing is complete.
+</footer>
+
+</div><!-- /#appRoot -->
+
+<script>
+  // ---- Password gate (basic obscurity, not real security) ----
+  // Default access code: oneid2026
+  // To change it: open a browser console anywhere and run
+  //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourNewCode'))
+  //     .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
+  // then paste the printed hash below.
+  const GATE_HASH = 'da36132b92966b3672fc095b9fed2188d4a0e57c23fe05d6406f36a201904c3f';
+
+  async function sha256(text){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function tryUnlock(){
+    const val = document.getElementById('gatePw').value;
+    const hash = await sha256(val);
+    if (hash === GATE_HASH){
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('appRoot').style.display = 'block';
+      sessionStorage.setItem('oneid_gate_ok', '1');
+    } else {
+      document.getElementById('gateErr').style.display = 'block';
+    }
+  }
+
+  document.getElementById('gateBtn').addEventListener('click', tryUnlock);
+  document.getElementById('gatePw').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') tryUnlock();
+  });
+
+  if (sessionStorage.getItem('oneid_gate_ok') === '1'){
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('appRoot').style.display = 'block';
+  }
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://aapjrtvhjdxrkofioayj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_22Nadm7464t_duOyHqiaYA_rQ0YcFXw';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+document.getElementById('urlLabel').textContent = SUPABASE_URL.replace('https://','');
+
+const ctx = {};
+function uuid(){ return crypto.randomUUID(); }
+
+const tests = [
+  {
+    title: 'Database connectivity',
+    desc: 'Confirms the site can reach the ONEID Supabase project and the Data API responds.',
+    run: async () => {
+      const { error, count } = await supabase.from('organizations').select('*', { count: 'exact', head: true });
+      if (error) throw error;
+      return `Connected. organizations table reachable (count=${count ?? 0}).`;
+    }
+  },
+  {
+    title: 'Organization creation',
+    desc: 'Inserts a test organization — the root record every other table hangs off.',
+    run: async () => {
+      ctx.orgId = uuid();
+      const { error } = await supabase.from('organizations').insert({
+        id: ctx.orgId,
+        organization_name: 'Staging Test Org',
+        organization_code: 'STG-' + Date.now(),
+      });
+      if (error) throw error;
+      return `Organization created: ${ctx.orgId}`;
+    }
+  },
+  {
+    title: 'User management',
+    desc: 'Inserts a test user linked to the organization created above.',
+    run: async () => {
+      if (!ctx.orgId) throw new Error('Run "Organization creation" first.');
+      ctx.userId = uuid();
+      const { error } = await supabase.from('users').insert({
+        id: ctx.userId,
+        organization_id: ctx.orgId,
+        email: `staging.${Date.now()}@24x7.work`,
+        full_name: 'Staging Test User',
+      });
+      if (error) throw error;
+      return `User created: ${ctx.userId}`;
+    }
+  },
+  {
+    title: 'Roles & permissions',
+    desc: 'Inserts a test role scoped to the organization, confirming Core RBAC tables accept writes.',
+    run: async () => {
+      if (!ctx.orgId) throw new Error('Run "Organization creation" first.');
+      ctx.roleId = uuid();
+      const { error } = await supabase.from('roles').insert({
+        id: ctx.roleId,
+        organization_id: ctx.orgId,
+        role_name: 'Staging Test Role',
+        role_code: 'STG_ROLE',
+      });
+      if (error) throw error;
+      return `Role created: ${ctx.roleId}`;
+    }
+  },
+  {
+    title: 'HRMS foundation',
+    desc: 'Inserts a department and an employee, confirming Migrations 067–085 are live and linked correctly.',
+    run: async () => {
+      if (!ctx.orgId || !ctx.userId) throw new Error('Run earlier tests first.');
+      ctx.deptId = uuid();
+      let res = await supabase.from('departments').insert({
+        id: ctx.deptId,
+        organization_id: ctx.orgId,
+        department_code: 'STG',
+        department_name: 'Staging Department',
+      });
+      if (res.error) throw res.error;
+
+      ctx.employeeId = uuid();
+      res = await supabase.from('employees').insert({
+        id: ctx.employeeId,
+        organization_id: ctx.orgId,
+        employee_code: 'EMP-STG-01',
+        first_name: 'Staging',
+        last_name: 'Employee',
+        joining_date: new Date().toISOString().slice(0,10),
+        department_id: ctx.deptId,
+        user_id: ctx.userId,
+      });
+      if (res.error) throw res.error;
+      return `Department + employee created (${ctx.deptId} / ${ctx.employeeId})`;
+    }
+  },
+  {
+    title: 'CRM foundation',
+    desc: 'Inserts a lead source and a lead, confirming Migrations 086–089 are live.',
+    run: async () => {
+      if (!ctx.orgId) throw new Error('Run "Organization creation" first.');
+      ctx.leadSourceId = uuid();
+      let res = await supabase.from('lead_sources').insert({
+        id: ctx.leadSourceId,
+        organization_id: ctx.orgId,
+        source_code: 'STG',
+        source_name: 'Staging Source',
+        source_category: 'DIGITAL',
+      });
+      if (res.error) throw res.error;
+
+      ctx.leadId = uuid();
+      res = await supabase.from('leads').insert({
+        id: ctx.leadId,
+        organization_id: ctx.orgId,
+        lead_number: 'LEAD-STG-01',
+        lead_source_id: ctx.leadSourceId,
+        first_name: 'Staging',
+        last_name: 'Lead',
+      });
+      if (res.error) throw res.error;
+      return `Lead source + lead created (${ctx.leadSourceId} / ${ctx.leadId})`;
+    }
+  },
+  {
+    title: 'Service requests',
+    desc: 'Inserts a test party (as customer) and a service ticket, confirming Migration 093 is live.',
+    run: async () => {
+      if (!ctx.orgId) throw new Error('Run "Organization creation" first.');
+      ctx.partyId = uuid();
+      let res = await supabase.from('parties').insert({
+        id: ctx.partyId,
+        organization_id: ctx.orgId,
+        party_name: 'Staging Test Customer',
+        party_type: 'CUSTOMER',
+      });
+      if (res.error) throw res.error;
+
+      ctx.ticketId = uuid();
+      res = await supabase.from('service_requests').insert({
+        id: ctx.ticketId,
+        organization_id: ctx.orgId,
+        ticket_number: 'TCK-STG-01',
+        customer_id: ctx.partyId,
+        subject: 'Staging smoke test ticket',
+      });
+      if (res.error) throw res.error;
+      return `Customer + service ticket created (${ctx.partyId} / ${ctx.ticketId})`;
+    }
+  },
+  {
+    title: 'Document upload',
+    desc: 'Inserts a document_attachments record pointing at the lead, confirming the platform-wide document engine (095).',
+    run: async () => {
+      if (!ctx.leadId || !ctx.userId) throw new Error('Run "CRM foundation" first.');
+      ctx.docId = uuid();
+      const { error } = await supabase.from('document_attachments').insert({
+        id: ctx.docId,
+        organization_id: ctx.orgId,
+        document_number: 'DOC-STG-01',
+        module_name: 'CRM',
+        entity_name: 'leads',
+        entity_id: ctx.leadId,
+        file_name: 'staging-test.txt',
+        original_file_name: 'staging-test.txt',
+        file_size: 128,
+        storage_path: '/staging/staging-test.txt',
+        uploaded_by: ctx.userId,
+      });
+      if (error) throw error;
+      return `Document record created: ${ctx.docId}`;
+    }
+  },
+  {
+    title: 'Workflow foundation',
+    desc: 'Inserts a workflow_definitions row, confirming Migration 100 (with its Production Revision) is live.',
+    run: async () => {
+      if (!ctx.orgId) throw new Error('Run "Organization creation" first.');
+      ctx.workflowId = uuid();
+      const { error } = await supabase.from('workflow_definitions').insert({
+        id: ctx.workflowId,
+        organization_id: ctx.orgId,
+        workflow_code: 'STG_WF',
+        workflow_name: 'Staging Workflow',
+        module_name: 'CRM',
+        entity_name: 'leads',
+        trigger_event: 'ON_CREATE',
+      });
+      if (error) throw error;
+      return `Workflow definition created: ${ctx.workflowId}`;
+    }
+  },
+  {
+    title: 'Basic CRUD test',
+    desc: 'Updates the staging lead, then deletes the staging workflow definition — confirms UPDATE and DELETE both work.',
+    run: async () => {
+      if (!ctx.leadId || !ctx.workflowId) throw new Error('Run earlier tests first.');
+      let res = await supabase.from('leads')
+        .update({ lead_status: 'CONTACTED' })
+        .eq('id', ctx.leadId);
+      if (res.error) throw res.error;
+
+      res = await supabase.from('workflow_definitions')
+        .delete()
+        .eq('id', ctx.workflowId);
+      if (res.error) throw res.error;
+
+      return 'Lead updated (status → CONTACTED) and workflow definition deleted.';
+    }
+  },
+  {
+    title: 'Foreign key validation',
+    desc: 'Attempts to insert an employee with a non-existent organization_id — this MUST fail for the test to pass.',
+    run: async () => {
+      const fakeOrgId = uuid();
+      const { error } = await supabase.from('employees').insert({
+        id: uuid(),
+        organization_id: fakeOrgId,
+        employee_code: 'FK-CHECK',
+        first_name: 'Should',
+        last_name: 'Fail',
+        joining_date: new Date().toISOString().slice(0,10),
+      });
+      if (!error) {
+        throw new Error('No FK error was raised — constraint is missing or not enforced!');
+      }
+      return `Correctly rejected: ${error.message}`;
+    }
+  },
+  {
+    title: 'Performance smoke test',
+    desc: 'Runs 5 concurrent read queries across Core / HRMS / CRM tables and reports response time.',
+    run: async () => {
+      const t0 = performance.now();
+      const results = await Promise.all([
+        supabase.from('organizations').select('id', { count: 'exact', head: true }),
+        supabase.from('employees').select('id', { count: 'exact', head: true }),
+        supabase.from('leads').select('id', { count: 'exact', head: true }),
+        supabase.from('service_requests').select('id', { count: 'exact', head: true }),
+        supabase.from('workflow_definitions').select('id', { count: 'exact', head: true }),
+      ]);
+      const t1 = performance.now();
+      const failed = results.filter(r => r.error);
+      if (failed.length) throw failed[0].error;
+      return `5 queries completed in ${(t1 - t0).toFixed(0)} ms.`;
+    }
+  },
+];
+
+const listEl = document.getElementById('testList');
+tests.forEach((t, i) => {
+  const el = document.createElement('div');
+  el.className = 'test';
+  el.innerHTML = `
+    <div class="test-head">
+      <div class="num">${String(i+1).padStart(2,'0')}</div>
+      <div class="test-body">
+        <div class="test-title">${t.title}</div>
+        <div class="test-desc">${t.desc}</div>
+        <div class="test-actions">
+          <button class="run-btn" data-idx="${i}">Run test</button>
+          <span class="status" id="status-${i}">idle</span>
+        </div>
+      </div>
+    </div>
+    <div class="log" id="log-${i}"></div>
+  `;
+  listEl.appendChild(el);
+});
+
+function updateSummary(){
+  const statuses = tests.map((_, i) => document.getElementById(`status-${i}`).textContent);
+  document.getElementById('passCount').textContent = statuses.filter(s=>s==='pass').length;
+  document.getElementById('failCount').textContent = statuses.filter(s=>s==='fail').length;
+  document.getElementById('pendingCount').textContent = statuses.filter(s=>s==='idle'||s==='running').length;
+}
+
+async function runTest(i){
+  const statusEl = document.getElementById(`status-${i}`);
+  const logEl = document.getElementById(`log-${i}`);
+  statusEl.textContent = 'running';
+  statusEl.className = 'status running';
+  logEl.classList.add('show');
+  logEl.innerHTML = 'Running…';
+  try{
+    const msg = await tests[i].run();
+    statusEl.textContent = 'pass';
+    statusEl.className = 'status pass';
+    logEl.innerHTML = `<span class="ok-line">✓ ${msg}</span>`;
+    document.getElementById('connDot').className = 'dotstatus ok';
+  }catch(err){
+    statusEl.textContent = 'fail';
+    statusEl.className = 'status fail';
+    logEl.innerHTML = `<span class="err-line">✗ ${err.message || err}</span>`;
+    if (i === 0) document.getElementById('connDot').className = 'dotstatus bad';
+  }
+  updateSummary();
+}
+
+listEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('.run-btn');
+  if (!btn) return;
+  runTest(Number(btn.dataset.idx));
+});
+
+document.getElementById('runAllBtn').addEventListener('click', async () => {
+  for (let i = 0; i < tests.length; i++){
+    await runTest(i);
+  }
+});
+</script>
+
+</body>
+</html>
