@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
+    document.getElementById("userEmail").textContent =
+    session.user.email;
+
     console.log("Logged in:", session.user.email);
 
     const logoutBtn = document.getElementById("logoutBtn");
