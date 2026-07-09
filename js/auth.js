@@ -18,11 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
-            const { data, error } = await Promise.race([
-
-                supabase.auth.signInWithPassword({
-                    email,
-                    password
+            const { data, error } = await window.supabaseClient.auth.signInWithPassword({
                 }),
 
                 new Promise((_, reject) =>
