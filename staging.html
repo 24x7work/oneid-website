@@ -258,6 +258,22 @@ document.getElementById('urlLabel').textContent = SUPABASE_URL.replace('https://
 const ctx = {};
 function uuid(){ return crypto.randomUUID(); }
 
+// users table has NO organization_id -- it is a global identity table
+// (the "oneid" column is the platform-wide identity code). Organizations
+// link to a user via organizations.owner_id, not the other way round.
+async function createUser(label){
+  const id = uuid();
+  const { error } = await supabase.from('users').insert({
+    id,
+    oneid: `STG-${label}-${Date.now()}`,
+    full_name: `Staging ${label}`,
+    password_hash: 'staging-test-hash-not-real',
+    email: `${label.toLowerCase()}.${Date.now()}@24x7.work`,
+  });
+  if (error) throw error;
+  return id;
+}
+
 const tests = [
   {
     title: 'Database connectivity',
@@ -270,31 +286,26 @@ const tests = [
   },
   {
     title: 'Organization creation',
-    desc: 'Inserts a test organization — the root record every other table hangs off.',
+    desc: 'Creates an owner user, then inserts a test organization — the root record every other table hangs off.',
     run: async () => {
+      ctx.ownerUserId = await createUser('Owner');
       ctx.orgId = uuid();
       const { error } = await supabase.from('organizations').insert({
         id: ctx.orgId,
-        organization_name: 'Staging Test Org',
+        owner_id: ctx.ownerUserId,
         organization_code: 'STG-' + Date.now(),
+        organization_name: 'Staging Test Org',
+        organization_type: 'PRIVATE_LIMITED',
       });
       if (error) throw error;
-      return `Organization created: ${ctx.orgId}`;
+      return `Organization created: ${ctx.orgId} (owner ${ctx.ownerUserId})`;
     }
   },
   {
     title: 'User management',
-    desc: 'Inserts a test user linked to the organization created above.',
+    desc: 'Inserts a separate test user — users are a global identity table (the "oneid" column), not tied to one organization.',
     run: async () => {
-      if (!ctx.orgId) throw new Error('Run "Organization creation" first.');
-      ctx.userId = uuid();
-      const { error } = await supabase.from('users').insert({
-        id: ctx.userId,
-        organization_id: ctx.orgId,
-        email: `staging.${Date.now()}@24x7.work`,
-        full_name: 'Staging Test User',
-      });
-      if (error) throw error;
+      ctx.userId = await createUser('Member');
       return `User created: ${ctx.userId}`;
     }
   },
@@ -307,8 +318,8 @@ const tests = [
       const { error } = await supabase.from('roles').insert({
         id: ctx.roleId,
         organization_id: ctx.orgId,
-        role_name: 'Staging Test Role',
         role_code: 'STG_ROLE',
+        role_name: 'Staging Test Role',
       });
       if (error) throw error;
       return `Role created: ${ctx.roleId}`;
@@ -375,13 +386,15 @@ const tests = [
     title: 'Service requests',
     desc: 'Inserts a test party (as customer) and a service ticket, confirming Migration 093 is live.',
     run: async () => {
-      if (!ctx.orgId) throw new Error('Run "Organization creation" first.');
+      if (!ctx.orgId || !ctx.userId) throw new Error('Run earlier tests first.');
       ctx.partyId = uuid();
       let res = await supabase.from('parties').insert({
         id: ctx.partyId,
         organization_id: ctx.orgId,
-        party_name: 'Staging Test Customer',
+        party_code: 'STG-CUST-01',
         party_type: 'CUSTOMER',
+        legal_name: 'Staging Test Customer',
+        created_by: ctx.userId,
       });
       if (res.error) throw res.error;
 
