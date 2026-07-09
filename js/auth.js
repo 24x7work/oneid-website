@@ -14,22 +14,30 @@ console.log(supabase);
 
         message.textContent = "Signing in...";
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password
-        });
+        try {
 
-        if (error) {
-            message.textContent = error.message;
-            return;
+    console.log(data);
+    console.log(error);
+
+    if (error) {
+        message.textContent = error.message;
+        return;
+    }
+
+    message.style.color = "green";
+    message.textContent = "Login successful.";
+
+    setTimeout(() => {
+        window.location.href = "dashboard.html";
+    }, 1000);
+
+} catch (err) {
+
+    console.error(err);
+
+    message.textContent = err.message;
+
         }
-
-        message.style.color = "green";
-        message.textContent = "Login successful.";
-
-        setTimeout(() => {
-            window.location.href = "dashboard.html";
-        }, 1000);
 
     });
 
