@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Auth JS Loaded");
-    console.log(window.supabase);
-    console.log(supabase);
+    console.log("window.supabase =", window.supabase);
+    console.log("window.supabaseClient =", window.supabaseClient);
 
     const form = document.getElementById("loginForm");
     const message = document.getElementById("message");
@@ -14,23 +14,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
 
+        message.style.color = "black";
         message.textContent = "Signing in...";
 
         try {
 
-            const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-                }),
+            const { data, error } =
+                await window.supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
 
-                new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Login Timeout")), 10000)
-                )
-
-            ]);
-
-            console.log(data);
-            console.log(error);
+            console.log("Data:", data);
+            console.log("Error:", error);
 
             if (error) {
+                message.style.color = "red";
                 message.textContent = error.message;
                 return;
             }
@@ -45,6 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
 
             console.error(err);
+
+            message.style.color = "red";
             message.textContent = err.message;
 
         }
