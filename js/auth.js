@@ -1,7 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-console.log("Auth JS Loaded");
-console.log(window.supabase);
-console.log(supabase);
+
+    console.log("Auth JS Loaded");
+    console.log(window.supabase);
+    console.log(supabase);
+
     const form = document.getElementById("loginForm");
     const message = document.getElementById("message");
 
@@ -16,26 +18,38 @@ console.log(supabase);
 
         try {
 
-    console.log(data);
-    console.log(error);
+            const { data, error } = await Promise.race([
 
-    if (error) {
-        message.textContent = error.message;
-        return;
-    }
+                supabase.auth.signInWithPassword({
+                    email,
+                    password
+                }),
 
-    message.style.color = "green";
-    message.textContent = "Login successful.";
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Login Timeout")), 10000)
+                )
 
-    setTimeout(() => {
-        window.location.href = "dashboard.html";
-    }, 1000);
+            ]);
 
-} catch (err) {
+            console.log(data);
+            console.log(error);
 
-    console.error(err);
+            if (error) {
+                message.textContent = error.message;
+                return;
+            }
 
-    message.textContent = err.message;
+            message.style.color = "green";
+            message.textContent = "Login successful.";
+
+            setTimeout(() => {
+                window.location.href = "dashboard.html";
+            }, 1000);
+
+        } catch (err) {
+
+            console.error(err);
+            message.textContent = err.message;
 
         }
 
