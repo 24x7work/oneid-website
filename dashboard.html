@@ -143,17 +143,9 @@ ONEID ERP v1.2.0 • Migration 001–100
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 
-<script>
-
-document.getElementById("logoutBtn").onclick = async ()=>{
-
-await supabase.auth.signOut();
-
-window.location.href="login.html";
-
-};
-
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/dashboard.js" defer></script>
 
 </body>
 </html>
