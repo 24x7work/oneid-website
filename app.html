@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ONEID — App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F3F5F9;
+    --panel: #FFFFFF;
+    --ink: #10192E;
+    --slate: #5B6579;
+    --faint: #93A0B4;
+    --line: #DEE3ED;
+    --indigo: #33409E;
+    --indigo-deep: #232C73;
+    --indigo-soft: #E7E9F7;
+    --amber: #E1963B;
+    --amber-soft: #FBEBD4;
+    --fail: #C13B3B;
+    --fail-bg: #FBEAEA;
+    --pass: #1E8E6F;
+    --pass-bg: #E4F5EF;
+    --display: "Space Grotesk", sans-serif;
+    --body: "Inter", -apple-system, sans-serif;
+    --mono: "JetBrains Mono", Menlo, monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); }
+  .hidden{ display:none !important; }
+
+  /* ---------- LOGIN ---------- */
+  #loginScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .login-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:28px 24px; max-width:340px; width:100%;
+  }
+  .brandline{
+    font-family:var(--display); font-weight:700; font-size:17px;
+    display:flex; align-items:center; gap:8px; margin-bottom:4px;
+  }
+  .brandline .dot{ width:8px; height:8px; border-radius:50%; background:var(--amber); }
+  .login-card .sub{ font-size:12.5px; color:var(--slate); margin-bottom:20px; }
+  .field{ margin-bottom:12px; }
+  .field label{ display:block; font-size:11.5px; font-weight:600; color:var(--slate); margin-bottom:5px; }
+  .field input, .field select{
+    width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--line);
+    font-family:var(--body); font-size:14px; outline:none; background:#fff;
+  }
+  .field input:focus, .field select:focus{ border-color:var(--indigo); }
+  .btn{
+    width:100%; padding:11px; border-radius:9px; border:none;
+    background:var(--indigo); color:#fff; font-weight:600; font-size:14px;
+    font-family:var(--body); cursor:pointer;
+  }
+  .btn:active{ opacity:0.85; }
+  .btn.secondary{ background:#fff; color:var(--indigo); border:1px solid var(--indigo); }
+  .toggle-row{ text-align:center; margin-top:14px; font-size:12.5px; color:var(--slate); }
+  .toggle-row a{ color:var(--indigo); font-weight:600; text-decoration:none; }
+  .msg{ font-size:12px; margin-top:10px; padding:8px 10px; border-radius:7px; display:none; }
+  .msg.err{ background:var(--fail-bg); color:var(--fail); display:block; }
+  .msg.ok{ background:var(--pass-bg); color:var(--pass); display:block; }
+
+  /* ---------- APP SHELL ---------- */
+  #appScreen{ min-height:100vh; }
+  nav.top{
+    background:var(--panel); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px;
+  }
+  .brand{ font-family:var(--display); font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .brand .dot{ width:8px; height:8px; border-radius:50%; background:var(--amber); }
+  .who{ display:flex; align-items:center; gap:10px; }
+  .who span{ font-size:12px; color:var(--slate); font-family:var(--mono); }
+  .logout-btn{
+    font-family:var(--body); font-size:12px; font-weight:600; color:var(--fail);
+    background:var(--fail-bg); border:none; padding:7px 12px; border-radius:7px;
+  }
+
+  .tabs{
+    display:flex; gap:6px; overflow-x:auto; padding:12px 14px 0; max-width:820px; margin:0 auto;
+  }
+  .tab{
+    font-family:var(--body); font-size:13px; font-weight:600; color:var(--slate);
+    background:var(--panel); border:1px solid var(--line); padding:9px 14px;
+    border-radius:9px 9px 0 0; white-space:nowrap; cursor:pointer;
+  }
+  .tab.active{ background:var(--indigo); color:#fff; border-color:var(--indigo); }
+
+  main{ max-width:820px; margin:0 auto; padding:16px 14px 60px; }
+
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:0 12px 12px 12px;
+    padding:16px;
+  }
+  .panel h2{ font-family:var(--display); font-size:16px; margin:0 0 4px; }
+  .panel .desc{ font-size:12px; color:var(--slate); margin-bottom:16px; }
+
+  .form-grid{ display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:14px; }
+  @media(min-width:520px){ .form-grid{ grid-template-columns:1fr 1fr; } }
+  .form-actions{ display:flex; gap:8px; margin-top:4px; }
+  .form-actions .btn{ width:auto; padding:9px 16px; font-size:13px; }
+  .form-actions .btn.cancel{ background:#fff; color:var(--slate); border:1px solid var(--line); }
+
+  table{ width:100%; border-collapse:collapse; margin-top:6px; font-size:13px; }
+  th{
+    text-align:left; font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+    color:var(--faint); padding:8px 8px; border-bottom:1px solid var(--line); letter-spacing:0.04em;
+  }
+  td{ padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+  .row-actions{ display:flex; gap:6px; white-space:nowrap; }
+  .icon-btn{
+    font-family:var(--body); font-size:11.5px; font-weight:600; padding:5px 9px;
+    border-radius:6px; border:1px solid var(--line); background:#fff; color:var(--slate);
+  }
+  .icon-btn.edit{ color:var(--indigo); border-color:var(--indigo-soft); }
+  .icon-btn.del{ color:var(--fail); border-color:#F3D4D4; }
+  .empty-state{ color:var(--faint); font-size:12.5px; text-align:center; padding:26px 10px; }
+  .scrollx{ overflow-x:auto; }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="brandline"><span class="dot"></span>ONEID</div>
+    <div class="sub" id="authSubtitle">Sign in to your workspace</div>
+
+    <div class="field" id="fullNameField" style="display:none;">
+      <label>Full name</label>
+      <input type="text" id="fullNameInput" placeholder="Your name" />
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="emailInput" placeholder="you@company.com" />
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="passwordInput" placeholder="••••••••" />
+    </div>
+
+    <button class="btn" id="submitAuthBtn">Sign in</button>
+    <div class="msg" id="authMsg"></div>
+
+    <div class="toggle-row" id="toggleRow">
+      New here? <a href="#" id="toggleModeLink">Create an account</a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP SCREEN ================= -->
+<div id="appScreen" class="hidden">
+  <nav class="top">
+    <div class="brand"><span class="dot"></span>ONEID</div>
+    <div class="who">
+      <span id="whoEmail"></span>
+      <button class="logout-btn" id="logoutBtn">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="organizations">Organizations</div>
+    <div class="tab" data-tab="employees">Employees</div>
+    <div class="tab" data-tab="leads">Leads</div>
+    <div class="tab" data-tab="service_requests">Service Requests</div>
+  </div>
+
+  <main>
+    <div class="panel">
+      <h2 id="panelTitle">Organizations</h2>
+      <div class="desc" id="panelDesc">Every other record belongs to one of your organizations.</div>
+
+      <div id="formArea"></div>
+      <div class="scrollx"><table id="dataTable"><thead></thead><tbody></tbody></table></div>
+      <div class="empty-state hidden" id="emptyState">No records yet — add your first one above.</div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://aapjrtvhjdxrkofioayj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_22Nadm7464t_duOyHqiaYA_rQ0YcFXw';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let mode = 'signin'; // or 'signup'
+let currentOrgs = []; // orgs owned by the logged-in user
+let editingId = null; // if set, form is in "update" mode
+
+// ---------- AUTH SCREEN LOGIC ----------
+const fullNameField = document.getElementById('fullNameField');
+const authSubtitle = document.getElementById('authSubtitle');
+const submitAuthBtn = document.getElementById('submitAuthBtn');
+const toggleModeLink = document.getElementById('toggleModeLink');
+const toggleRow = document.getElementById('toggleRow');
+const authMsg = document.getElementById('authMsg');
+
+function setMode(m){
+  mode = m;
+  if (mode === 'signup'){
+    fullNameField.style.display = 'block';
+    authSubtitle.textContent = 'Create your ONEID workspace account';
+    submitAuthBtn.textContent = 'Create account';
+    toggleRow.innerHTML = 'Already have an account? <a href="#" id="toggleModeLink">Sign in</a>';
+  } else {
+    fullNameField.style.display = 'none';
+    authSubtitle.textContent = 'Sign in to your workspace';
+    submitAuthBtn.textContent = 'Sign in';
+    toggleRow.innerHTML = 'New here? <a href="#" id="toggleModeLink">Create an account</a>';
+  }
+  document.getElementById('toggleModeLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    setMode(mode === 'signin' ? 'signup' : 'signin');
+  });
+  authMsg.className = 'msg';
+  authMsg.textContent = '';
+}
+document.getElementById('toggleModeLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  setMode(mode === 'signin' ? 'signup' : 'signin');
+});
+
+submitAuthBtn.addEventListener('click', async () => {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  authMsg.className = 'msg';
+  authMsg.textContent = '';
+
+  if (!email || !password){
+    authMsg.className = 'msg err';
+    authMsg.textContent = 'Email and password are required.';
+    return;
+  }
+
+  submitAuthBtn.disabled = true;
+  try{
+    if (mode === 'signup'){
+      const fullName = document.getElementById('fullNameInput').value.trim();
+      const { error } = await supabase.auth.signUp({
+        email, password,
+        options: { data: { full_name: fullName || email.split('@')[0] } }
+      });
+      if (error) throw error;
+      authMsg.className = 'msg ok';
+      authMsg.textContent = 'Account created. If email confirmation is required, check your inbox — otherwise you are now signed in.';
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    }
+  }catch(err){
+    authMsg.className = 'msg err';
+    authMsg.textContent = err.message || String(err);
+  }
+  submitAuthBtn.disabled = false;
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+});
+
+// ---------- SESSION ROUTING ----------
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session){
+    showApp(session);
+  } else {
+    showLogin();
+  }
+});
+
+function showLogin(){
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('appScreen').classList.add('hidden');
+}
+
+async function showApp(session){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+  document.getElementById('whoEmail').textContent = session.user.email;
+  await refreshOrgs();
+  renderTab('organizations');
+}
+
+async function refreshOrgs(){
+  const { data, error } = await supabase.from('organizations').select('id, organization_name').order('organization_name');
+  currentOrgs = error ? [] : (data || []);
+}
+
+// ---------- TAB DEFINITIONS ----------
+const TABS = {
+  organizations: {
+    title: 'Organizations',
+    desc: 'The root record every other module hangs off. You automatically own any organization you create.',
+    table: 'organizations',
+    columns: [
+      { key: 'organization_name', label: 'Name', type: 'text', required: true },
+      { key: 'organization_code', label: 'Code', type: 'text', required: true },
+      { key: 'organization_type', label: 'Type', type: 'select', required: true,
+        options: ['PRIVATE_LIMITED','PARTNERSHIP','SOLE_PROPRIETORSHIP','NGO','OTHER'] },
+    ],
+    listColumns: ['organization_name','organization_code','organization_type'],
+    afterCreate: async (row) => {
+      // seed a default lead source + walk-in customer so Leads / Service
+      // Requests have something valid to reference immediately.
+      await supabase.from('lead_sources').insert({
+        id: crypto.randomUUID(), organization_id: row.id,
+        source_code: 'GENERAL', source_name: 'General', source_category: 'OTHER',
+      });
+      await supabase.from('parties').insert({
+        id: crypto.randomUUID(), organization_id: row.id,
+        party_code: 'WALKIN', party_type: 'CUSTOMER', legal_name: 'Walk-in Customer',
+        created_by: (await supabase.auth.getUser()).data.user.id,
+      });
+    }
+  },
+  employees: {
+    title: 'Employees',
+    desc: 'HRMS foundation (Migrations 067–085). Scoped to the organization you pick below.',
+    table: 'employees',
+    columns: [
+      { key: 'organization_id', label: 'Organization', type: 'org-select', required: true },
+      { key: 'employee_code', label: 'Employee code', type: 'text', required: true },
+      { key: 'first_name', label: 'First name', type: 'text', required: true },
+      { key: 'last_name', label: 'Last name', type: 'text' },
+      { key: 'joining_date', label: 'Joining date', type: 'date', required: true, default: () => new Date().toISOString().slice(0,10) },
+    ],
+    listColumns: ['employee_code','first_name','last_name','joining_date'],
+  },
+  leads: {
+    title: 'Leads',
+    desc: 'CRM foundation (Migrations 086–089). Uses the organization\'s default "General" lead source automatically.',
+    table: 'leads',
+    columns: [
+      { key: 'organization_id', label: 'Organization', type: 'org-select', required: true },
+      { key: 'first_name', label: 'First name', type: 'text', required: true },
+      { key: 'last_name', label: 'Last name', type: 'text' },
+      { key: 'company_name', label: 'Company', type: 'text' },
+    ],
+    listColumns: ['lead_number','first_name','last_name','company_name','lead_status'],
+    beforeCreate: async (payload) => {
+      payload.lead_number = 'LEAD-' + Date.now();
+      const { data } = await supabase.from('lead_sources')
+        .select('id').eq('organization_id', payload.organization_id).eq('source_code','GENERAL').maybeSingle();
+      payload.lead_source_id = data ? data.id : null;
+      if (!payload.lead_source_id) throw new Error('No default lead source found for this organization yet.');
+      return payload;
+    }
+  },
+  service_requests: {
+    title: 'Service Requests',
+    desc: 'Service module (Migration 093). Uses the organization\'s default "Walk-in Customer" party automatically.',
+    table: 'service_requests',
+    columns: [
+      { key: 'organization_id', label: 'Organization', type: 'org-select', required: true },
+      { key: 'subject', label: 'Subject', type: 'text', required: true },
+    ],
+    listColumns: ['ticket_number','subject','status','priority'],
+    beforeCreate: async (payload) => {
+      payload.ticket_number = 'TCK-' + Date.now();
+      const { data } = await supabase.from('parties')
+        .select('id').eq('organization_id', payload.organization_id).eq('party_code','WALKIN').maybeSingle();
+      payload.customer_id = data ? data.id : null;
+      if (!payload.customer_id) throw new Error('No default customer found for this organization yet.');
+      return payload;
+    }
+  },
+};
+
+let activeTab = 'organizations';
+
+document.querySelectorAll('.tab').forEach(el => {
+  el.addEventListener('click', () => renderTab(el.dataset.tab));
+});
+
+function orgSelectHtml(id, selectedId){
+  const opts = currentOrgs.map(o => `<option value="${o.id}" ${o.id===selectedId?'selected':''}>${escapeHtml(o.organization_name)}</option>`).join('');
+  return `<select id="${id}"><option value="">Select organization…</option>${opts}</select>`;
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function renderTab(tabKey){
+  activeTab = tabKey;
+  editingId = null;
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tabKey));
+  const cfg = TABS[tabKey];
+  document.getElementById('panelTitle').textContent = cfg.title;
+  document.getElementById('panelDesc').textContent = cfg.desc;
+  await refreshOrgs();
+  renderForm(cfg);
+  await renderList(cfg);
+}
+
+function renderForm(cfg, existingRow){
+  const formArea = document.getElementById('formArea');
+  const fieldsHtml = cfg.columns.map(col => {
+    const val = existingRow ? existingRow[col.key] : (col.default ? col.default() : '');
+    if (col.type === 'org-select'){
+      return `<div class="field"><label>${col.label}</label>${orgSelectHtml('f_'+col.key, val)}</div>`;
+    }
+    if (col.type === 'select'){
+      const opts = col.options.map(o => `<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('');
+      return `<div class="field"><label>${col.label}</label><select id="f_${col.key}">${opts}</select></div>`;
+    }
+    return `<div class="field"><label>${col.label}</label><input type="${col.type}" id="f_${col.key}" value="${escapeHtml(val||'')}" /></div>`;
+  }).join('');
+
+  formArea.innerHTML = `
+    <div class="form-grid">${fieldsHtml}</div>
+    <div class="form-actions">
+      <button class="btn" id="saveBtn" style="width:auto;">${existingRow ? 'Update' : 'Add'}</button>
+      ${existingRow ? '<button class="btn cancel" id="cancelEditBtn">Cancel</button>' : ''}
+    </div>
+    <div class="msg" id="formMsg"></div>
+  `;
+
+  document.getElementById('saveBtn').addEventListener('click', () => saveRow(cfg, existingRow));
+  const cancelBtn = document.getElementById('cancelEditBtn');
+  if (cancelBtn) cancelBtn.addEventListener('click', () => renderTab(activeTab));
+}
+
+async function saveRow(cfg, existingRow){
+  const formMsg = document.getElementById('formMsg');
+  formMsg.className = 'msg';
+  formMsg.textContent = '';
+
+  let payload = {};
+  for (const col of cfg.columns){
+    const el = document.getElementById('f_' + col.key);
+    const val = el.value;
+    if (col.required && !val){
+      formMsg.className = 'msg err';
+      formMsg.textContent = `${col.label} is required.`;
+      return;
+    }
+    payload[col.key] = val || null;
+  }
+
+  try{
+    if (existingRow){
+      const { error } = await supabase.from(cfg.table).update(payload).eq('id', existingRow.id);
+      if (error) throw error;
+    } else {
+      if (cfg.beforeCreate) payload = await cfg.beforeCreate(payload);
+      payload.id = crypto.randomUUID();
+      if (cfg.table === 'organizations'){
+        payload.owner_id = (await supabase.auth.getUser()).data.user.id;
+      }
+      const { error } = await supabase.from(cfg.table).insert(payload);
+      if (error) throw error;
+      if (cfg.afterCreate) await cfg.afterCreate(payload);
+    }
+    await renderTab(activeTab);
+  }catch(err){
+    formMsg.className = 'msg err';
+    formMsg.textContent = err.message || String(err);
+  }
+}
+
+async function renderList(cfg){
+  const thead = document.querySelector('#dataTable thead');
+  const tbody = document.querySelector('#dataTable tbody');
+  const emptyState = document.getElementById('emptyState');
+
+  thead.innerHTML = '<tr>' + cfg.listColumns.map(c => `<th>${c.replace(/_/g,' ')}</th>`).join('') + '<th>Actions</th></tr>';
+
+  const { data, error } = await supabase.from(cfg.table).select('*').order('created_at', { ascending: false }).limit(50);
+  if (error){
+    tbody.innerHTML = `<tr><td colspan="${cfg.listColumns.length+1}">Error: ${escapeHtml(error.message)}</td></tr>`;
+    emptyState.classList.add('hidden');
+    return;
+  }
+
+  if (!data || data.length === 0){
+    tbody.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  emptyState.classList.add('hidden');
+
+  tbody.innerHTML = data.map(row => {
+    const cells = cfg.listColumns.map(c => `<td>${escapeHtml(row[c])}</td>`).join('');
+    return `<tr>${cells}<td><div class="row-actions">
+        <button class="icon-btn edit" data-id="${row.id}">Edit</button>
+        <button class="icon-btn del" data-id="${row.id}">Delete</button>
+      </div></td></tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('.icon-btn.edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = data.find(r => r.id === btn.dataset.id);
+      renderForm(cfg, row);
+    });
+  });
+  tbody.querySelectorAll('.icon-btn.del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this record?')) return;
+      await supabase.from(cfg.table).delete().eq('id', btn.dataset.id);
+      await renderTab(activeTab);
+    });
+  });
+}
+
+// ---------- Boot ----------
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) showApp(session); else showLogin();
+});
+</script>
+
+</body>
+</html>
