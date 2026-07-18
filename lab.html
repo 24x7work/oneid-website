@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Migration Converter — 24x7.work / ONEID</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F3F5F9;
+    --panel: #FFFFFF;
+    --ink: #10192E;
+    --slate: #5B6579;
+    --faint: #93A0B4;
+    --line: #DEE3ED;
+    --indigo: #33409E;
+    --indigo-deep: #232C73;
+    --indigo-soft: #E7E9F7;
+    --amber: #E1963B;
+    --amber-soft: #FBEBD4;
+    --pass: #1E8E6F;
+    --pass-bg: #E4F5EF;
+    --fail: #C13B3B;
+    --fail-bg: #FBEAEA;
+    --warn: #9C6A1E;
+    --warn-bg: #FBEBD4;
+    --display: "Space Grotesk", sans-serif;
+    --body: "Inter", -apple-system, sans-serif;
+    --mono: "JetBrains Mono", Menlo, monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); }
+  .wrap{ max-width:820px; margin:0 auto; padding:0 16px 60px; }
+
+  nav.top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; max-width:820px; margin:0 auto;
+  }
+  .brand{ font-family:var(--display); font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .brand .dot{ width:8px; height:8px; border-radius:50%; background:var(--amber); }
+  nav.top a{ font-size:13px; color:var(--slate); text-decoration:none; }
+  nav.top a:hover{ color:var(--indigo); }
+
+  header.head{ padding:6px 0 20px; }
+  .eyebrow{
+    font-family: var(--mono); font-size: 11px; letter-spacing:0.1em;
+    text-transform:uppercase; color: var(--indigo); font-weight:600;
+    background: var(--indigo-soft); display:inline-block;
+    padding: 5px 10px; border-radius:6px; margin-bottom:12px;
+  }
+  h1{ font-family:var(--display); font-size:24px; margin:0 0 8px; letter-spacing:-0.01em; }
+  header.head p{ font-size:13.5px; color:var(--slate); max-width:600px; margin:0; line-height:1.5; }
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:20px; margin-bottom:16px;
+  }
+  .card h2{ font-family:var(--display); font-size:15px; margin:0 0 4px; }
+  .card .sub{ font-size:12px; color:var(--slate); margin-bottom:14px; }
+
+  .dropzone{
+    border:2px dashed var(--line); border-radius:12px; padding:34px 16px;
+    text-align:center; cursor:pointer; transition:border-color .15s;
+  }
+  .dropzone.drag{ border-color:var(--indigo); background:var(--indigo-soft); }
+  .dropzone .icon{ font-size:30px; margin-bottom:8px; }
+  .dropzone .main-text{ font-weight:600; font-size:14px; margin-bottom:4px; }
+  .dropzone .sub-text{ font-size:12px; color:var(--slate); }
+  input[type=file]{ display:none; }
+
+  .filepill{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--indigo-soft); border-radius:9px; padding:10px 14px;
+    font-size:13px; margin-top:10px;
+  }
+  .filepill b{ font-weight:600; }
+  .filepill button{
+    border:none; background:none; color:var(--fail); font-weight:600;
+    font-size:12px; cursor:pointer;
+  }
+
+  .btn{
+    width:100%; padding:12px; border-radius:9px; border:none;
+    background:var(--indigo); color:#fff; font-weight:600; font-size:14px;
+    font-family:var(--body); cursor:pointer; margin-top:14px;
+  }
+  .btn:disabled{ opacity:0.5; cursor:not-allowed; }
+  .btn.secondary{ background:#fff; color:var(--indigo); border:1px solid var(--indigo); }
+  .btn.success{ background:var(--pass); }
+
+  .progress-line{
+    font-family:var(--mono); font-size:11.5px; color:var(--slate);
+    margin-top:10px; display:none;
+  }
+  .progress-line.show{ display:block; }
+
+  .summary-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .summary-grid .stat{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:12px; text-align:center;
+  }
+  .summary-grid .stat .n{ font-family:var(--mono); font-size:20px; font-weight:700; }
+  .summary-grid .stat .l{ font-size:10px; color:var(--slate); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+  .summary-grid .stat.fixed .n{ color:var(--pass); }
+  .summary-grid .stat.warn .n{ color:var(--warn); }
+  .summary-grid .stat.fail .n{ color:var(--fail); }
+
+  .finding{
+    border-left:3px solid var(--line); padding:10px 12px; margin-bottom:8px;
+    background:#F7F8FB; border-radius:0 8px 8px 0; font-size:12.5px;
+  }
+  .finding.fixed{ border-color:var(--pass); }
+  .finding.warn{ border-color:var(--warn); }
+  .finding.fail{ border-color:var(--fail); }
+  .finding .tag{
+    font-family:var(--mono); font-size:9.5px; text-transform:uppercase;
+    font-weight:700; letter-spacing:.05em; margin-bottom:4px; display:inline-block;
+    padding:2px 7px; border-radius:5px;
+  }
+  .finding.fixed .tag{ background:var(--pass-bg); color:var(--pass); }
+  .finding.warn .tag{ background:var(--warn-bg); color:var(--warn); }
+  .finding.fail .tag{ background:var(--fail-bg); color:var(--fail); }
+  .finding .msg{ color:var(--ink); }
+  .finding .detail{ color:var(--slate); font-family:var(--mono); font-size:11px; margin-top:4px; word-break:break-word; }
+  .finding.resolved{ opacity:0.6; }
+  .finding.resolved .tag{ background:var(--pass-bg); color:var(--pass); }
+
+  .resolve-row{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  }
+  .resolve-btn{
+    font-family:var(--body); font-size:11.5px; font-weight:600;
+    padding:6px 11px; border-radius:7px; border:1px solid var(--indigo);
+    background:#fff; color:var(--indigo); cursor:pointer;
+  }
+  .resolve-btn:active{ background:var(--indigo-soft); }
+  .resolve-check{
+    display:flex; align-items:center; gap:6px; font-size:11.5px;
+    color:var(--slate); cursor:pointer; user-select:none;
+  }
+  .resolve-check input{ accent-color: var(--pass); width:14px; height:14px; }
+  .resolve-note{
+    font-size:11px; color:var(--pass); margin-top:6px; display:none;
+  }
+  .resolve-note.show{ display:block; }
+
+  .codebox{
+    background:#0F1626; color:#D8E0F0; font-family:var(--mono); font-size:11px;
+    border-radius:10px; padding:14px; max-height:280px; overflow:auto; white-space:pre-wrap;
+    word-break:break-word; margin-top:10px;
+  }
+
+  footer{
+    max-width:820px; margin:20px auto 0; padding:16px 18px 0;
+    font-size:11.5px; color:var(--faint); font-family:var(--mono); line-height:1.6;
+    border-top:1px solid var(--line);
+  }
+  .hidden{ display:none !important; }
+
+  /* ---------- PASSWORD GATE ---------- */
+  #gate{
+    position:fixed; inset:0; background:var(--paper); z-index:60;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  #gate .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:28px 24px; max-width:340px; width:100%; text-align:center;
+  }
+  #gate .brandline{
+    font-family:var(--display); font-weight:700; font-size:16px;
+    display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:6px;
+  }
+  #gate .brandline .dot{ width:8px; height:8px; border-radius:50%; background:var(--amber); }
+  #gate h2{ font-family:var(--display); font-size:16px; margin:6px 0 6px; }
+  #gate p{ font-size:12.5px; color:var(--slate); margin:0 0 16px; }
+  #gate input{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
+    font-family:var(--mono); font-size:14px; margin-bottom:10px; text-align:center; outline:none;
+  }
+  #gate input:focus{ border-color:var(--indigo); }
+  #gate button{
+    width:100%; padding:11px; border-radius:8px; border:none;
+    background:var(--indigo); color:#fff; font-family:var(--body); font-weight:600; font-size:14px;
+  }
+  #gate .err{ color:var(--fail); font-size:12px; margin-top:10px; display:none; }
+  #gate .note{ font-family:var(--mono); font-size:10px; color:var(--faint); margin-top:16px; line-height:1.5; }
+  #labRoot{ display:none; }
+
+  /* ---------- TOOL SWITCHER ---------- */
+  .tool-tabs{ display:flex; gap:8px; overflow-x:auto; padding:0 0 16px; }
+  .tool-tab{
+    font-family:var(--body); font-size:12.5px; font-weight:600; white-space:nowrap;
+    padding:9px 14px; border-radius:9px; border:1px solid var(--line); background:var(--panel);
+    color:var(--slate); cursor:pointer; flex-shrink:0;
+  }
+  .tool-tab.active{ background:var(--indigo); color:#fff; border-color:var(--indigo); }
+  .tool-tab.soon{ opacity:0.5; cursor:default; }
+  .tool-panel{ display:none; }
+  .tool-panel.active{ display:block; }
+  .soon-card{
+    background:var(--panel); border:1px dashed var(--line); border-radius:14px;
+    padding:30px 16px; text-align:center; color:var(--faint); font-size:12.5px;
+  }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="card">
+    <div class="brandline"><span class="dot"></span>24x7.work</div>
+    <h2>ONEID Backend Development Lab</h2>
+    <p>Internal tooling for ONEID ERP development &amp; testing. Enter the access code to continue.</p>
+    <input type="password" id="gatePw" placeholder="Access code" autocomplete="off" />
+    <button id="gateBtn">Unlock</button>
+    <div class="err" id="gateErr">Incorrect code — try again.</div>
+    <div class="note">Not linked from the public site. Basic access gate only —<br>not a security boundary for anything sensitive.</div>
+  </div>
+</div>
+
+<div id="labRoot">
+
+<nav class="top">
+  <div class="brand"><span class="dot"></span>24x7.work</div>
+  <a href="/index.html">← Back to site</a>
+</nav>
+
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow">Internal · ONEID Backend Development Lab</div>
+    <h1>Development Lab</h1>
+    <p>
+      A growing set of internal tools for building and testing ONEID ERP —
+      migration conversion today, more tools to follow as the platform grows.
+    </p>
+  </header>
+
+  <div class="tool-tabs">
+    <div class="tool-tab active" data-tool="migration-converter">🛠️ Migration Converter</div>
+    <div class="tool-tab soon" title="Coming soon">＋ More tools soon</div>
+  </div>
+
+  <!-- ============= TOOL: Migration Converter ============= -->
+  <div class="tool-panel active" id="tool-migration-converter">
+
+  <div class="card">
+    <h2>1. Upload</h2>
+    <div class="sub">Accepts .pdf and .docx (older binary .doc is not supported by browser-side tools — export to .docx or PDF first).</div>
+    <div class="dropzone" id="dropzone">
+      <div class="icon">📄</div>
+      <div class="main-text">Tap to choose a file</div>
+      <div class="sub-text">or drag and drop a .pdf / .docx here</div>
+    </div>
+    <input type="file" id="fileInput" accept=".pdf,.docx" />
+    <div id="filePill"></div>
+    <button class="btn" id="processBtn" disabled>Extract &amp; analyze</button>
+    <div class="progress-line" id="progressLine">Working…</div>
+  </div>
+
+  <div class="card hidden" id="reportCard">
+    <h2>2. Findings report</h2>
+    <div class="sub">What was auto-fixed, and what still needs your judgment before deploying.</div>
+    <div class="summary-grid">
+      <div class="stat fixed"><div class="n" id="fixedCount">0</div><div class="l">Auto-fixed</div></div>
+      <div class="stat warn"><div class="n" id="warnCount">0</div><div class="l">Needs review</div></div>
+      <div class="stat fail"><div class="n" id="failCount">0</div><div class="l">Blocking</div></div>
+    </div>
+    <div id="findingsList"></div>
+  </div>
+
+  <div class="card hidden" id="previewCard">
+    <h2>3. Converted SQL preview</h2>
+    <div class="sub">First 4000 characters of the converted output — the full file is in the downloaded ZIP.</div>
+    <div class="codebox" id="codePreview"></div>
+  </div>
+
+  <div class="card hidden" id="downloadCard">
+    <h2>4. Download release package</h2>
+    <div class="sub">Migration file + baseline copy + a README containing this full report.</div>
+    <button class="btn success" id="downloadBtn">Download release ZIP</button>
+  </div>
+
+  <div class="card">
+    <h2>What this tool does — and doesn't — catch</h2>
+    <div class="sub" style="margin-bottom:6px;">
+      ✅ Reliably auto-fixed: <code>AUTO_INCREMENT</code>, <code>ENUM(...)</code>,
+      <code>ON UPDATE CURRENT_TIMESTAMP</code>, inline <code>UNIQUE KEY</code> /
+      <code>INDEX</code> / <code>FULLTEXT KEY</code>, <code>BIGINT</code> primary
+      keys, <code>DATETIME</code>/<code>LONGTEXT</code>, stray
+      <code>[span_N]</code> artifacts.
+    </div>
+    <div class="sub" style="margin:0;">
+      ⚠️ Flagged for manual review, not auto-resolved: new tables whose name
+      already exists elsewhere in ONEID (may need a rename or may need to
+      extend the existing table instead — a judgment call), and
+      <code>REFERENCES</code> to tables not in the known registry (may be a
+      typo, or an intentional forward reference to a not-yet-built table).
+      Use the "Copy prompt for Claude" button on any flagged item to get
+      help resolving it in a fresh Claude chat.
+    </div>
+  </div>
+
+  </div>
+  <!-- ============= /TOOL: Migration Converter ============= -->
+
+</div>
+
+<footer>
+  Runs entirely in your browser — the file never leaves your device except
+  to the PDF/DOCX parsing libraries loaded from jsdelivr/cdnjs. The
+  known-table registry is best-effort (compiled from the ONEID migration
+  history) and may not be 100% exhaustive — always cross-check the final
+  output against your live Supabase schema before deploying.
+</footer>
+
+</div><!-- /#labRoot -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.7.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+try{
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}catch(e){
+  console.error('pdf.js failed to load — PDF extraction will be unavailable:', e);
+}
+
+// ---- Password gate (basic obscurity, not real security) ----
+// Default access code: oneidlab2026
+// To change it: open a browser console anywhere and run
+//   crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourNewCode'))
+//     .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
+// then paste the printed hash below.
+const GATE_HASH = '734fec840a8cadbbcd2b414c73535cf63f759a25c35ad03daf88a6cef59827d1';
+
+async function sha256(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function tryUnlock(){
+  const val = document.getElementById('gatePw').value;
+  const hash = await sha256(val);
+  if (hash === GATE_HASH){
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('labRoot').style.display = 'block';
+    sessionStorage.setItem('oneid_lab_gate_ok', '1');
+  } else {
+    document.getElementById('gateErr').style.display = 'block';
+  }
+}
+
+document.getElementById('gateBtn').addEventListener('click', tryUnlock);
+document.getElementById('gatePw').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') tryUnlock();
+});
+
+if (sessionStorage.getItem('oneid_lab_gate_ok') === '1'){
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('labRoot').style.display = 'block';
+}
+
+// ---- Tool switcher (extend this as more tools are added) ----
+document.querySelectorAll('.tool-tab[data-tool]').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tool-tab[data-tool]').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const toolId = tab.dataset.tool;
+    document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById('tool-' + toolId);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+// ============================================================
+// Best-effort known-table registry, compiled from the ONEID
+// migration history built across Core (001-066), HRMS (067-085),
+// CRM & Service (086-100), Projects & Assets (101-110), and
+// Platform Engine batches (111-140). Core/HRMS coverage is
+// partial (compiled from repository listings, not every column
+// file) -- verify final output against the live schema.
+// ============================================================
+const KNOWN_TABLES = new Set([
+  // Core ERP (partial, best-effort)
+  "accounting_periods","attachments","audit_logs","bank_accounts","bank_reconciliations",
+  "bank_transactions","batches","brands","chart_of_accounts","credit_notes",
+  "customer_invoice_lines","customer_invoices","customer_return_lines","customer_returns",
+  "debit_notes","delivery_note_lines","delivery_notes","devices","events","fields",
+  "fiscal_years","general_ledger","goods_receipt_lines","goods_receipts","jobs",
+  "journal_entries","journal_entry_lines","notifications","organizations","pages",
+  "parties","party_addresses","party_contacts","payment_allocations","payment_methods",
+  "payments","permissions","product_categories","products","purchase_order_lines",
+  "purchase_orders","receipt_allocations","receipts","records","role_permissions","roles",
+  "sales_order_lines","sales_orders","search_index","serial_numbers","sessions",
+  "stock_balances","stock_ledger","sync_queue","users","warehouses",
+  // HRMS & Payroll
+  "employees","departments","designations","employee_documents","employee_bank_accounts",
+  "salary_structures","attendance","attendance_logs","shift_types","employee_shifts",
+  "leave_types","leave_applications","leave_balances","payroll_periods","payroll_runs",
+  "salary_slips","payroll_components","payroll_component_lines",
+  // CRM & Service
+  "crm_settings","lead_sources","leads","lead_activities","opportunities","quotations",
+  "quotation_items","customer_contacts","service_requests","service_request_comments",
+  "document_attachments","sla_policies","business_hours","business_hour_slots",
+  "holiday_calendars","holiday_calendar_days","workflow_definitions",
+  // Projects & Assets
+  "projects","project_members","project_phases","project_tasks","task_dependencies",
+  "project_milestones","timesheets","resource_allocations","project_risks","project_documents",
+  // Platform Engines Batch 1 (111-120)
+  "asset_categories","asset_locations","assets","asset_assignments","asset_status_history",
+  "asset_depreciation_profiles","asset_depreciation_books","asset_depreciation_schedule",
+  "asset_depreciation_runs","asset_revaluations","asset_maintenance_plans",
+  "asset_maintenance_work_orders","asset_maintenance_tasks","asset_maintenance_parts",
+  "asset_maintenance_history","asset_transfers","asset_verifications","asset_disposals",
+  "asset_insurance","asset_audit_log","asset_warranties","asset_alerts",
+  "asset_meter_readings","asset_kpi_snapshots","asset_report_templates","workflow_steps",
+  "workflow_instances","workflow_actions","workflow_notifications","notification_templates",
+  "notification_queue","notification_delivery_logs","user_notification_preferences",
+  "user_notifications","document_folders","document_version_history",
+  "document_permissions","document_tags","activity_types","activity_logs",
+  "record_audit_logs","user_sessions","business_events","system_settings",
+  "organization_settings","feature_flags","organization_features","module_configurations",
+  // Platform Engines Batch 2 (121-130)
+  "report_categories","report_definitions","report_executions","dashboard_widgets",
+  "user_dashboard_layouts","import_templates","import_jobs","import_error_logs",
+  "export_templates","export_jobs","integration_providers","api_credentials",
+  "webhook_endpoints","api_request_logs","api_rate_limits","scheduled_jobs",
+  "job_executions","job_queue","job_retry_history","scheduler_locks","search_indexes",
+  "search_index_queue","saved_searches","search_history","search_synonyms",
+  "user_devices","user_mfa","api_access_tokens","security_events","subscription_plans",
+  "organization_subscriptions","module_licenses","usage_counters","license_audit_logs",
+  "backup_policies","backup_jobs","restore_jobs","data_retention_policies",
+  "backup_audit_logs","languages","translation_keys","translation_values","currencies",
+  "organization_localization","ai_providers","ai_agents","ai_prompt_templates","ai_jobs",
+  "ai_execution_logs",
+  // Platform Engines Batch 3 (131-140)
+  "classification_groups","classifications","record_classifications","classification_rules",
+  "classification_audit_logs","record_comments","comment_mentions","comment_attachments",
+  "comment_reactions","comment_watchers","task_lists","tasks","task_checklist_items",
+  "universal_task_dependencies","task_time_logs","calendars","calendar_events",
+  "event_attendees","event_reminders","organization_holidays","dynamic_forms",
+  "form_sections","form_fields","form_submissions","form_submission_values",
+  "business_rules","rule_conditions","rule_actions","rule_execution_logs","rule_versions",
+  "print_templates","template_variables","print_jobs","template_versions","print_job_logs",
+  "signature_requests","signature_request_signers","digital_signatures","approval_evidence",
+  "signature_audit_logs","trust_profiles","verification_requests","trust_evidence",
+  "trust_score_history","blacklist_entries","entity_registry","relationship_types",
+  "entity_relationships","relationship_attributes","relationship_audit_logs",
+]);
+
+let extractedText = "";
+let selectedFile = null;
+let findings = [];
+let convertedSql = "";
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const filePill = document.getElementById('filePill');
+const processBtn = document.getElementById('processBtn');
+const progressLine = document.getElementById('progressLine');
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length) setFile(e.target.files[0]);
+});
+
+function setFile(file){
+  selectedFile = file;
+  filePill.innerHTML = `<div class="filepill"><span><b>${escapeHtml(file.name)}</b> · ${(file.size/1024).toFixed(0)} KB</span><button id="clearFile">Remove</button></div>`;
+  document.getElementById('clearFile').addEventListener('click', () => {
+    selectedFile = null;
+    filePill.innerHTML = '';
+    processBtn.disabled = true;
+  });
+  processBtn.disabled = false;
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function setProgress(msg){
+  progressLine.textContent = msg;
+  progressLine.classList.add('show');
+}
+
+processBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  processBtn.disabled = true;
+  try{
+    setProgress('Reading file…');
+    if (selectedFile.name.toLowerCase().endsWith('.pdf')){
+      extractedText = await extractPdf(selectedFile);
+    } else if (selectedFile.name.toLowerCase().endsWith('.docx')){
+      extractedText = await extractDocx(selectedFile);
+    } else {
+      alert('Please upload a .pdf or .docx file.');
+      processBtn.disabled = false;
+      return;
+    }
+    setProgress('Analyzing SQL and checking against known schema…');
+    await new Promise(r => setTimeout(r, 50));
+    runLinter(extractedText);
+    renderReport();
+    renderPreview();
+    document.getElementById('reportCard').classList.remove('hidden');
+    document.getElementById('previewCard').classList.remove('hidden');
+    document.getElementById('downloadCard').classList.remove('hidden');
+    setProgress('Done.');
+  }catch(err){
+    alert('Could not process this file: ' + (err.message || err));
+    setProgress('');
+  }
+  processBtn.disabled = false;
+});
+
+async function extractPdf(file){
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let text = "";
+  for (let i = 1; i <= pdf.numPages; i++){
+    setProgress(`Reading page ${i} of ${pdf.numPages}…`);
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it => it.str).join(" ") + "\n";
+  }
+  return text;
+}
+
+async function extractDocx(file){
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer: buf });
+  return result.value;
+}
+
+// ============================================================
+// Linter + auto-fixer
+// ============================================================
+function runLinter(rawText){
+  findings = [];
+  let text = rawText;
+
+  // Strip leaked citation/markup artifacts like [span_11](start_span)
+  const spanMatches = text.match(/\[span_\d+\]\((start_span|end_span)\)/g);
+  if (spanMatches){
+    text = text.replace(/\[span_\d+\]\((start_span|end_span)\)/g, '');
+    findings.push({ level:'fixed', msg:`Removed ${spanMatches.length} leaked citation-marker artifact(s) (e.g. [span_11](end_span)) found mid-statement.` });
+  }
+
+  // AUTO_INCREMENT / BIGINT primary keys -> UUID
+  const autoIncMatches = text.match(/BIGINT\s+PRIMARY\s+KEY\s+AUTO_INCREMENT/gi);
+  if (autoIncMatches){
+    text = text.replace(/BIGINT\s+PRIMARY\s+KEY\s+AUTO_INCREMENT/gi, 'UUID PRIMARY KEY');
+    findings.push({ level:'fixed', msg:`Converted ${autoIncMatches.length} MySQL "BIGINT PRIMARY KEY AUTO_INCREMENT" column(s) to "UUID PRIMARY KEY".`, detail:'ONEID uses UUID everywhere -- BIGINT ids are incompatible with every existing foreign key (organizations.id, users.id, etc. are all UUID).' });
+  }
+  // stray remaining AUTO_INCREMENT
+  const stray = text.match(/AUTO_INCREMENT/gi);
+  if (stray){
+    text = text.replace(/\s*AUTO_INCREMENT/gi, '');
+    findings.push({ level:'fixed', msg:`Removed ${stray.length} remaining AUTO_INCREMENT keyword(s) not in a primary-key column.` });
+  }
+
+  // ENUM('A','B') -> VARCHAR(30)
+  const enumMatches = text.match(/ENUM\s*\([^)]*\)/gi);
+  if (enumMatches){
+    text = text.replace(/ENUM\s*\([^)]*\)/gi, 'VARCHAR(30)');
+    findings.push({ level:'fixed', msg:`Converted ${enumMatches.length} inline ENUM(...) column type(s) to VARCHAR(30).`, detail:'PostgreSQL has no inline ENUM syntax. Allowed values are documented in comments only, not enforced -- add a CHECK constraint manually if you need it enforced.' });
+  }
+
+  // ON UPDATE CURRENT_TIMESTAMP -> removed (Postgres has no equivalent)
+  const onUpdate = text.match(/ON\s+UPDATE\s+CURRENT_TIMESTAMP/gi);
+  if (onUpdate){
+    text = text.replace(/\s*ON\s+UPDATE\s+CURRENT_TIMESTAMP/gi, '');
+    findings.push({ level:'fixed', msg:`Removed ${onUpdate.length} "ON UPDATE CURRENT_TIMESTAMP" clause(s) -- not supported in PostgreSQL.`, detail:'updated_at will only default on insert, same as every other ONEID table. The application layer is responsible for setting it on update.' });
+  }
+
+  // TIMESTAMP -> TIMESTAMPTZ
+  const tsMatches = text.match(/\bTIMESTAMP\b(?!TZ)/g);
+  if (tsMatches){
+    text = text.replace(/\bTIMESTAMP\b(?!TZ)/g, 'TIMESTAMPTZ');
+    findings.push({ level:'fixed', msg:`Converted ${tsMatches.length} TIMESTAMP column(s) to TIMESTAMPTZ, matching the rest of ONEID.` });
+  }
+
+  // DATETIME -> TIMESTAMPTZ
+  const dtMatches = text.match(/\bDATETIME\b/gi);
+  if (dtMatches){
+    text = text.replace(/\bDATETIME\b/gi, 'TIMESTAMPTZ');
+    findings.push({ level:'fixed', msg:`Converted ${dtMatches.length} DATETIME column(s) to TIMESTAMPTZ.` });
+  }
+
+  // LONGTEXT / MEDIUMTEXT / TINYTEXT -> TEXT
+  const textTypes = text.match(/\b(LONGTEXT|MEDIUMTEXT|TINYTEXT)\b/gi);
+  if (textTypes){
+    text = text.replace(/\b(LONGTEXT|MEDIUMTEXT|TINYTEXT)\b/gi, 'TEXT');
+    findings.push({ level:'fixed', msg:`Converted ${textTypes.length} MySQL text type(s) (LONGTEXT/MEDIUMTEXT/TINYTEXT) to TEXT.` });
+  }
+
+  // JSON -> JSONB
+  const jsonMatches = text.match(/\bJSON\b(?!B)/g);
+  if (jsonMatches){
+    text = text.replace(/\bJSON\b(?!B)/g, 'JSONB');
+    findings.push({ level:'fixed', msg:`Converted ${jsonMatches.length} JSON column(s) to JSONB (matches the rest of ONEID; JSONB is indexable and faster).` });
+  }
+
+  // UNIQUE KEY name (...) -> CONSTRAINT ... UNIQUE (...)
+  const uniqueKeyMatches = text.match(/UNIQUE\s+KEY\s+\w+\s*\(/gi);
+  if (uniqueKeyMatches){
+    text = text.replace(/UNIQUE\s+KEY\s+(\w+)\s*\(/gi, 'CONSTRAINT $1 UNIQUE (');
+    findings.push({ level:'fixed', msg:`Converted ${uniqueKeyMatches.length} MySQL "UNIQUE KEY name (...)" clause(s) to a named CONSTRAINT.` });
+  }
+
+  // FULLTEXT KEY -> flagged (needs manual tsvector/GIN setup, can't safely auto-fix inline)
+  const fulltextMatches = text.match(/FULLTEXT\s+KEY[^,)]*[,)]/gi);
+  if (fulltextMatches){
+    findings.push({ level:'warn', msg:`Found ${fulltextMatches.length} MySQL "FULLTEXT KEY" clause(s) -- removed from the table body but NOT auto-converted.`, detail:'PostgreSQL needs a generated TSVECTOR column + a GIN index for full-text search (see Migration 125 in the ONEID repo for the exact pattern). Add this manually.' });
+    text = text.replace(/,?\s*FULLTEXT\s+KEY[^,)]*[,)]/gi, (m) => m.trim().endsWith(')') ? ')' : ',');
+  }
+
+  // Bare INDEX name (...) inside CREATE TABLE -> flagged (needs splitting to standalone CREATE INDEX)
+  const inlineIndexMatches = text.match(/,\s*(?:KEY|INDEX)\s+\w+\s*\([^)]*\)/gi);
+  if (inlineIndexMatches){
+    findings.push({ level:'warn', msg:`Found ${inlineIndexMatches.length} inline INDEX/KEY clause(s) inside CREATE TABLE.`, detail:'PostgreSQL does not allow INDEX inside CREATE TABLE. These were removed from the table body; recreate each as a standalone "CREATE INDEX idx_name ON table(column);" statement after the table (see any existing ONEID migration file for the pattern).' });
+    text = text.replace(/,\s*(?:KEY|INDEX)\s+\w+\s*\([^)]*\)/gi, '');
+  }
+
+  // Table name collision check
+  const createTableMatches = [...text.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[`"]?(\w+)[`"]?/gi)];
+  const seenInFile = new Set();
+  for (const m of createTableMatches){
+    const tableName = m[1].toLowerCase();
+    if (KNOWN_TABLES.has(tableName)){
+      findings.push({ level:'warn', msg:`Table "${tableName}" already exists elsewhere in ONEID.`, detail:'This may be an intentional duplicate name that needs renaming, or this migration may actually intend to extend the existing table (ALTER TABLE) rather than recreate it -- both patterns have happened before in this repo. Needs a judgment call before deploying.' });
+    }
+    if (seenInFile.has(tableName)){
+      findings.push({ level:'fail', msg:`Table "${tableName}" is defined more than once in this same document.` });
+    }
+    seenInFile.add(tableName);
+  }
+
+  // FK target check
+  const fkMatches = [...text.matchAll(/REFERENCES\s+[`"]?(\w+)[`"]?\s*\(/gi)];
+  const uncheckedTargets = new Set();
+  for (const m of fkMatches){
+    const target = m[1].toLowerCase();
+    if (!KNOWN_TABLES.has(target) && !seenInFile.has(target)){
+      uncheckedTargets.add(target);
+    }
+  }
+  if (uncheckedTargets.size){
+    findings.push({ level:'warn', msg:`${uncheckedTargets.size} REFERENCES target(s) not found in the known table registry or this document: ${[...uncheckedTargets].join(', ')}.`, detail:'Could be a genuine forward reference to a table built in a later migration (fine to leave as a plain column without the FK, per the established Forward FK Strategy), or a typo. Verify each one.' });
+  }
+
+  if (createTableMatches.length === 0){
+    findings.push({ level:'fail', msg:'No CREATE TABLE statements were found in the extracted text.', detail:'Check that the PDF/DOCX actually contains SQL, and that the text extracted cleanly (scanned/image-only PDFs cannot be read this way).' });
+  }
+
+  // Wrap in BEGIN/COMMIT if not already
+  const trimmed = text.trim();
+  if (!/^\s*BEGIN\s*;/i.test(trimmed)){
+    text = "BEGIN;\n\n" + trimmed + "\n\nCOMMIT;\n";
+    findings.push({ level:'fixed', msg:'Wrapped the migration in BEGIN...COMMIT so it runs as a single transaction, matching every other ONEID release.' });
+  }
+
+  convertedSql = text;
+}
+
+function renderReport(){
+  const fixed = findings.filter(f => f.level === 'fixed');
+  const warn = findings.filter((f, i) => f.level === 'warn');
+  const fail = findings.filter(f => f.level === 'fail');
+
+  document.getElementById('fixedCount').textContent = fixed.length;
+  document.getElementById('warnCount').textContent = warn.filter(f => !f.resolved).length;
+  document.getElementById('failCount').textContent = fail.length;
+
+  // give every finding a stable index so buttons can reference it
+  findings.forEach((f, i) => { f._idx = i; });
+
+  const order = [...fail, ...warn, ...fixed];
+  document.getElementById('findingsList').innerHTML = order.map(f => `
+    <div class="finding ${f.level}${f.resolved ? ' resolved' : ''}" data-idx="${f._idx}">
+      <span class="tag">${f.level === 'fixed' ? 'Auto-fixed' : f.level === 'warn' ? (f.resolved ? 'Resolved' : 'Needs review') : 'Blocking'}</span>
+      <div class="msg">${escapeHtml(f.msg)}</div>
+      ${f.detail ? `<div class="detail">${escapeHtml(f.detail)}</div>` : ''}
+      ${f.level === 'warn' ? `
+        <div class="resolve-row">
+          <button class="resolve-btn copy-prompt" data-idx="${f._idx}">📋 Copy prompt for Claude</button>
+          <label class="resolve-check">
+            <input type="checkbox" class="resolved-toggle" data-idx="${f._idx}" ${f.resolved ? 'checked' : ''} />
+            Resolved manually
+          </label>
+        </div>
+        <div class="resolve-note" id="resolveNote-${f._idx}"></div>
+      ` : ''}
+    </div>
+  `).join('') || '<div class="finding fixed">No issues of any kind found — extracted SQL looked clean.</div>';
+
+  document.querySelectorAll('.copy-prompt').forEach(btn => {
+    btn.addEventListener('click', () => copyPromptForFinding(Number(btn.dataset.idx)));
+  });
+  document.querySelectorAll('.resolved-toggle').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const idx = Number(chk.dataset.idx);
+      findings[idx].resolved = chk.checked;
+      renderReport();
+    });
+  });
+}
+
+function copyPromptForFinding(idx){
+  const f = findings[idx];
+  const baseName = (selectedFile?.name || 'this migration file');
+  const prompt = `I'm working on the ONEID database (a large multi-batch Postgres/Supabase migration project). I ran "${baseName}" through the Migration Converter tool and it flagged this issue that needs a judgment call:
+
+ISSUE: ${f.msg}
+${f.detail ? `CONTEXT: ${f.detail}\n` : ''}
+Here is the relevant extracted/converted SQL for reference:
+
+${convertedSql.slice(0, 3000)}
+
+Please tell me exactly how to resolve this -- e.g. should I rename a table, extend an existing table instead of creating a new one, add or skip a foreign key, or something else -- consistent with how similar issues were resolved elsewhere in the ONEID migration history (Core 001-066, HRMS 067-085, CRM & Service 086-100, Projects & Assets 101-110, Platform Engines 111-140).`;
+
+  navigator.clipboard.writeText(prompt).then(() => {
+    const note = document.getElementById(`resolveNote-${idx}`);
+    if (note){
+      note.textContent = '✓ Prompt copied — paste it into a new Claude chat.';
+      note.classList.add('show');
+    }
+  }).catch(() => {
+    const note = document.getElementById(`resolveNote-${idx}`);
+    if (note){
+      note.textContent = 'Could not copy automatically — select and copy the text manually from the preview above.';
+      note.classList.add('show');
+    }
+  });
+}
+
+function renderPreview(){
+  document.getElementById('codePreview').textContent = convertedSql.slice(0, 4000) + (convertedSql.length > 4000 ? '\n\n… (truncated preview, full file in ZIP)' : '');
+}
+
+document.getElementById('downloadBtn').addEventListener('click', async () => {
+  const zip = new JSZip();
+  const baseName = (selectedFile?.name || 'migration').replace(/\.(pdf|docx)$/i, '').replace(/[^a-zA-Z0-9_-]+/g, '_');
+
+  zip.file(`${baseName}_converted.sql`, convertedSql);
+
+  const fixed = findings.filter(f => f.level === 'fixed');
+  const warn = findings.filter(f => f.level === 'warn');
+  const fail = findings.filter(f => f.level === 'fail');
+
+  const readme = `# ${baseName} — Conversion Report
+
+Generated by the ONEID Migration Converter (24x7.work/migration-tool.html).
+
+**Auto-fixed: ${fixed.length}  |  Needs review: ${warn.length}  |  Blocking: ${fail.length}**
+
+⚠️ This is a mechanical, best-effort conversion. Table-name collisions
+and FK-target warnings below need a human (or Claude) judgment call —
+see the ONEID migration history for how similar conflicts were resolved
+(e.g. Migration 116 extending an existing table instead of recreating
+it, Migration 133 renaming a colliding table). For anything flagged
+"Needs review" or "Blocking", the safest path is still to send the
+source file to Claude directly for full architectural review.
+
+## Blocking issues
+${fail.length ? fail.map(f => `- ${f.msg}${f.detail ? `\n  - ${f.detail}` : ''}`).join('\n') : '- None.'}
+
+## Needs review
+${warn.length ? warn.map(f => `- ${f.msg}${f.detail ? `\n  - ${f.detail}` : ''}`).join('\n') : '- None.'}
+
+## Auto-fixed
+${fixed.length ? fixed.map(f => `- ${f.msg}${f.detail ? `\n  - ${f.detail}` : ''}`).join('\n') : '- None.'}
+
+## Files in this package
+- \`${baseName}_converted.sql\` — the converted migration, ready for review and deployment via the Supabase SQL Editor or your existing deploy.sh pattern.
+`;
+
+  zip.file('README.md', readme);
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${baseName}_release.zip`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+</script>
+
+</body>
+</html>
