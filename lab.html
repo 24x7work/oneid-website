@@ -732,7 +732,7 @@ Please tell me exactly how to resolve this -- e.g. should I rename a table, exte
   navigator.clipboard.writeText(prompt).then(() => {
     const note = document.getElementById(`resolveNote-${idx}`);
     if (note){
-      note.textContent = '✓ Prompt copied — paste it into a new Claude chat.';
+      note.textContent = '✓ Prompt copied — paste it into a new AI chat.';
       note.classList.add('show');
     }
   }).catch(() => {
