@@ -298,7 +298,7 @@
       <code>REFERENCES</code> to tables not in the known registry (may be a
       typo, or an intentional forward reference to a not-yet-built table).
       Use the "Copy prompt for Claude" button on any flagged item to get
-      help resolving it in a fresh Claude chat.
+      help resolving it in a fresh AI chat.
     </div>
   </div>
 
@@ -328,12 +328,12 @@ try{
 }
 
 // ---- Password gate (basic obscurity, not real security) ----
-// Default access code: oneidlab2026
+// Default access code: xxxxxxxxxx
 // To change it: open a browser console anywhere and run
 //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourNewCode'))
 //     .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
 // then paste the printed hash below.
-const GATE_HASH = '734fec840a8cadbbcd2b414c73535cf63f759a25c35ad03daf88a6cef59827d1';
+const GATE_HASH = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 async function sha256(text){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
