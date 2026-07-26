@@ -475,20 +475,52 @@ function renderPreview(){
 document.getElementById('downloadBtn').addEventListener('click', async () => {
   const zip = new JSZip();
   const baseName = 'oneid_combined_migration_release';
-  zip.file(`${baseName}_converted.sql`, convertedSql);
 
+  // 1. Create Qwen Studio compatible folder
+  const qwenFolder = zip.folder("qwen_knowledge_base");
+  qwenFolder.file(`${baseName}.txt`, convertedSql);
+  const sqlMarkdown = `# ONEID Migration: ${baseName}\n\n## Converted SQL Code\n\n\`\`\`sql\n${convertedSql}\n\`\`\``;
+  qwenFolder.file(`${baseName}.md`, sqlMarkdown);
+
+  // 2. Production-ready SQL file
+  zip.file(`${baseName}.sql`, convertedSql);
+
+  // 3. Rollback script (Reverse order DROP TABLE)
+  const createTableMatches = [...convertedSql.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[`"]?(\w+)[`"]?/gi)];
+  const tableNames = createTableMatches.map(m => m[1]).reverse();
+  const rollbackSql = `-- Rollback script for ${baseName}\n-- Generated: ${new Date().toISOString()}\n\nBEGIN;\n\n` +
+    tableNames.map(t => `DROP TABLE IF EXISTS ${t} CASCADE;`).join('\n') +
+    `\n\nCOMMIT;\n`;
+  zip.file('rollback.sql', rollbackSql);
+
+  // 4. Deploy script
+  const deploySh = `#!/bin/bash\n# Deploy script for ${baseName}\necho "Deploying ${baseName}..."\npsql -U postgres -d your_database -f ${baseName}.sql\necho "Deployment complete!"\n`;
+  zip.file('deploy.sh', deploySh);
+
+  // 5. Enhanced README
   const fixed = findings.filter(f => f.level === 'fixed');
   const warn = findings.filter(f => f.level === 'warn');
   const fail = findings.filter(f => f.level === 'fail');
 
-  const readme = `# ONEID Migration Release Report\n\n**Auto-fixed: ${fixed.length} | Needs review: ${warn.length} | Blocking: ${fail.length}**\n\n## Findings\n${findings.map(f => `- [${f.level.toUpperCase()}] ${f.msg}`).join('\n')}`;
+  const readme = `# ${baseName} — Complete Migration Package\n\n**Generated:** ${new Date().toISOString()}\n\n## Summary\n- ✅ Auto-fixed: ${fixed.length}\n- ⚠️ Needs Review: ${warn.length}\n- ❌ Blocking: ${fail.length}\n\n## Files\n- \`${baseName}.sql\` (Production SQL)\n- \`rollback.sql\` (Undo script)\n- \`deploy.sh\` (Deploy script)\n- \`qwen_knowledge_base/\` (For Qwen Studio)\n\n## Findings\n${findings.map(f => `- [${f.level.toUpperCase()}] ${f.msg}`).join('\n')}`;
   zip.file('README.md', readme);
 
+  // 6. Manifest JSON
+  const manifest = {
+    migration_name: baseName,
+    generated_at: new Date().toISOString(),
+    stats: { auto_fixed: fixed.length, needs_review: warn.length, blocking: fail.length },
+    files: [`${baseName}.sql`, 'rollback.sql', 'deploy.sh', 'README.md'],
+    qwen_studio_ready: true
+  };
+  zip.file('manifest.json', JSON.stringify(manifest, null, 2));
+
+  // Generate and download
   const blob = await zip.generateAsync({ type: 'blob' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${baseName}.zip`;
+  a.download = `${baseName}_complete.zip`;
   document.body.appendChild(a);
   a.click();
   a.remove();
