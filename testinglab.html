@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONEID Super Lab Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent: #4f46e5; /* Indigo */
+            --accent-hover: #4338ca;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-primary); height: 100vh; overflow: hidden; }
+
+        /* --- AUTH GATE --- */
+        #authGate {
+            position: fixed; inset: 0; background: var(--bg-main); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-box {
+            background: var(--bg-card); padding: 40px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px;
+            border: 1px solid var(--border);
+        }
+        .auth-box h2 { margin-bottom: 20px; font-size: 24px; text-align: center; }
+        .auth-box input {
+            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 14px; outline: none;
+        }
+        .auth-box input:focus { border-color: var(--accent); }
+        .auth-box button {
+            width: 100%; padding: 12px; background: var(--accent); color: white;
+            border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;
+        }
+        .auth-box button:hover { background: var(--accent-hover); }
+
+        /* --- MAIN LAYOUT --- */
+        #appContainer { display: flex; height: 100vh; }
+
+        /* --- SIDEBAR --- */
+        #sidebar {
+            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; transition: width 0.3s ease;
+            position: relative; z-index: 100;
+        }
+        #sidebar.collapsed { width: 70px; }
+        
+        .sidebar-header {
+            padding: 20px; display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border); height: 70px;
+        }
+        .brand-text { font-weight: 700; font-size: 18px; color: var(--accent); white-space: nowrap; overflow: hidden; }
+        #sidebar.collapsed .brand-text { display: none; }
+
+        /* Hamburger Menu (Three Lines) */
+        .menu-toggle {
+            background: none; border: none; cursor: pointer; padding: 5px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .menu-toggle span {
+            display: block; width: 20px; height: 2px; background: var(--text-primary);
+            transition: 0.3s;
+        }
+        #sidebar.collapsed .menu-toggle span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+        #sidebar.collapsed .menu-toggle span:nth-child(2) { opacity: 0; }
+        #sidebar.collapsed .menu-toggle span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+        .nav-section { flex: 1; overflow-y: auto; padding: 20px 10px; }
+        .nav-title {
+            font-size: 11px; text-transform: uppercase; color: var(--text-secondary);
+            font-weight: 600; margin-bottom: 10px; padding-left: 10px; white-space: nowrap;
+        }
+        #sidebar.collapsed .nav-title { display: none; }
+
+        .nav-item {
+            display: flex; align-items: center; padding: 10px; border-radius: 8px;
+            cursor: pointer; color: var(--text-secondary); margin-bottom: 4px; transition: 0.2s;
+        }
+        .nav-item:hover, .nav-item.active { background: #f1f5f9; color: var(--accent); }
+        .nav-item .icon { font-size: 20px; min-width: 30px; text-align: center; }
+        .nav-item .label { margin-left: 10px; white-space: nowrap; overflow: hidden; }
+        #sidebar.collapsed .nav-item .label { display: none; }
+        #sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
+
+        .sidebar-footer {
+            padding: 20px; border-top: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .user-avatar {
+            width: 32px; height: 32px; background: var(--accent); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 14px;
+        }
+        .user-info { flex: 1; overflow: hidden; }
+        .user-email { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-role { font-size: 11px; color: var(--text-secondary); }
+        #sidebar.collapsed .user-info { display: none; }
+
+        /* --- MAIN CONTENT --- */
+        #mainContent { flex: 1; overflow-y: auto; padding: 30px; }
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-size: 24px; margin-bottom: 5px; }
+        .page-header p { color: var(--text-secondary); font-size: 14px; }
+
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 24px; margin-bottom: 20px;
+        }
+        .card h3 { margin-bottom: 15px; font-size: 16px; }
+
+        /* Buttons & Inputs */
+        .btn {
+            padding: 10px 20px; border-radius: 8px; border: none; font-weight: 500;
+            cursor: pointer; font-size: 14px; transition: 0.2s;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+        .btn-outline:hover { background: #f1f5f9; }
+        
+        .dropzone {
+            border: 2px dashed var(--border); border-radius: 8px; padding: 40px;
+            text-align: center; cursor: pointer; color: var(--text-secondary);
+        }
+        .dropzone:hover { border-color: var(--accent); background: #f8fafc; }
+
+        /* Settings Toggles */
+        .setting-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid var(--border);
+        }
+        .setting-row:last-child { border-bottom: none; }
+        .toggle-switch {
+            width: 44px; height: 24px; background: #cbd5e1; border-radius: 12px;
+            position: relative; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-switch.on { background: var(--success); }
+        .toggle-switch::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 20px; height: 20px; background: white; border-radius: 50%; transition: 0.3s;
+        }
+        .toggle-switch.on::after { left: 22px; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center; z-index: 2000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px;
+        }
+        .modal h3 { margin-bottom: 20px; }
+        .modal input, .modal select {
+            width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+        .hidden { display: none !important; }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            #sidebar { position: fixed; height: 100%; transform: translateX(-100%); width: 260px !important; }
+            #sidebar.mobile-open { transform: translateX(0); }
+            #sidebar.collapsed { width: 260px !important; } /* Disable collapse on mobile, use slide */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUTH GATE -->
+    <div id="authGate">
+        <div class="auth-box">
+            <h2>ONEID Lab Hub</h2>
+            <input type="email" id="loginEmail" placeholder="Email (e.g., admin@24x7.work)">
+            <input type="password" id="loginPass" placeholder="Password">
+            <button onclick="handleLogin()">Login</button>
+            <p style="text-align:center; margin-top:15px; font-size:12px; color:var(--text-secondary);">
+                <a href="#" onclick="alert('OTP sent via Resend (Stub)')" style="color:var(--accent); text-decoration:none;">Forgot Password?</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="appContainer" class="hidden">
+        
+        <!-- SIDEBAR -->
+        <div id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-text">ONEID Lab</div>
+                <!-- Three-line Hamburger Toggle -->
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">Core Tools</div>
+                <div id="toolsList"></div> <!-- JSON Driven -->
+
+                <div class="nav-title" style="margin-top:20px;">Site Navigator</div>
+                <div id="sitesList"></div> <!-- JSON Driven -->
+                <div class="nav-item" onclick="addNewSite()">
+                    <div class="icon">+</div>
+                    <div class="label">Add New Site</div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-info">
+                    <div class="user-email" id="userEmail">admin@24x7.work</div>
+                    <div class="user-role" id="userRole">ADMIN</div>
+                </div>
+                <button class="btn btn-outline" style="padding:5px 10px; font-size:12px;" onclick="handleLogout()">Out</button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div id="mainContent">
+            <!-- Content injected via JS based on active tab -->
+            <div id="tabContent"></div>
+        </div>
+    </div>
+
+    <!-- USER MANAGEMENT MODAL -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <h3>User Management</h3>
+            <input type="email" id="newUserEmail" placeholder="New User Email">
+            <select id="newUserRole">
+                <option value="sub_admin">Sub Admin</option>
+                <option value="employee">Employee</option>
+                <option value="viewer">Viewer</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('userModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addUser()">Add User</button>
+            </div>
+            <div id="userListDisplay" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // 1. JSON CONFIGURATION (The Brain)
+        // =====================================================================
+        const LAB_CONFIG = {
+            tools: [
+                { id: 'migration', name: 'Migration Converter', icon: '🔄', component: 'renderMigrationTab' },
+                { id: 'settings', name: 'Universal Settings', icon: '️', component: 'renderSettingsTab' },
+                { id: 'users', name: 'User Management', icon: '👥', component: 'openUserModal' }
+            ],
+            sites: [
+                { name: 'Home / Dashboard', path: '/index.html', icon: '' },
+                { name: 'Login Portal', path: '/login.html', icon: '' },
+                { name: 'User Dashboard', path: '/dashboard.html', icon: '📊' },
+                { name: 'Main App', path: '/app.html', icon: '📱' }
+            ],
+            settings: {
+                auto_linter: true,
+                auto_fk_fix: true,
+                auto_naming: true,
+                require_otp: false
+            }
+        };
+
+        let state = {
+            user: null,
+            activeTab: 'migration',
+            users: JSON.parse(localStorage.getItem('lab_users')) || [{ email: 'admin@24x7.work', role: 'admin', name: 'Admin' }]
+        };
+
+        // =====================================================================
+        // 2. INITIALIZATION & RENDERING
+        // =====================================================================
+        function initApp() {
+            renderSidebar();
+            switchTab('migration');
+        }
+
+        function renderSidebar() {
+            // Render Tools
+            const toolsHtml = LAB_CONFIG.tools.map(tool => `
+                <div class="nav-item ${state.activeTab === tool.id ? 'active' : ''}" onclick="switchTab('${tool.id}')">
+                    <div class="icon">${tool.icon}</div>
+                    <div class="label">${tool.name}</div>
+                </div>
+            `).join('');
+            document.getElementById('toolsList').innerHTML = toolsHtml;
+
+            // Render Sites
+            const sitesHtml = LAB_CONFIG.sites.map(site => `
+                <div class="nav-item" onclick="window.open('${site.path}', '_blank')">
+                    <div class="icon">${site.icon}</div>
+                    <div class="label">${site.name}</div>
+                </div>
+            `).join('');
+            document.getElementById('sitesList').innerHTML = sitesHtml;
+        }
+
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            renderSidebar(); // Update active class
+            
+            const tool = LAB_CONFIG.tools.find(t => t.id === tabId);
+            if (tool && typeof window[tool.component] === 'function') {
+                window[tool.component]();
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        // =====================================================================
+        // 3. TAB COMPONENTS (The Views)
+        // =====================================================================
+        function renderMigrationTab() {
+            document.getElementById('tabContent').innerHTML = `
+                <div class="page-header">
+                    <h1>Migration Converter</h1>
+                    <p>Upload PDF/DOCX to generate PostgreSQL scripts.</p>
+                </div>
+                <div class="card">
+                    <h3>1. Upload Files</h3>
+                    <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+                        <p>Click to upload or drag & drop</p>
+                        <p style="font-size:12px; margin-top:5px;">Supports .pdf, .docx, .zip</p>
+                    </div>
+                    <input type="file" id="fileInput" multiple style="display:none" onchange="handleFiles(this.files)">
+                    <div id="fileList" style="margin-top:15px;"></div>
+                    <button class="btn btn-primary" style="margin-top:20px; width:100%;" onclick="processFiles()">Extract & Analyze</button>
+                </div>
+                <div class="card hidden" id="resultCard">
+                    <h3>2. Results</h3>
+                    <p style="color:var(--success);">✅ Processing complete. (Mock)</p>
+                    <div style="display:flex; gap:10px; margin-top:15px;">
+                        <button class="btn btn-primary">Download ZIP</button>
+                        <button class="btn btn-outline">Copy SQL</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSettingsTab() {
+            const settingsHtml = Object.keys(LAB_CONFIG.settings).map(key => {
+                const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const isOn = LAB_CONFIG.settings[key] ? 'on' : '';
+                return `
+                    <div class="setting-row">
+                        <div>
+                            <div style="font-weight:500;">${label}</div>
+                            <div style="font-size:12px; color:var(--text-secondary);">Toggle this feature on or off.</div>
+                        </div>
+                        <div class="toggle-switch ${isOn}" onclick="toggleSetting('${key}', this)"></div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('tabContent').innerHTML = `
+                <div class="page-header">
+                    <h1>Universal Settings</h1>
+                    <p>Configure Lab Hub behavior. Changes apply immediately.</p>
+                </div>
+                <div class="card">
+                    <h3>Processing & Linter</h3>
+                    ${settingsHtml}
+                </div>
+            `;
+        }
+
+        function toggleSetting(key, element) {
+            LAB_CONFIG.settings[key] = !LAB_CONFIG.settings[key];
+            element.classList.toggle('on');
+            console.log(`Setting ${key} updated to ${LAB_CONFIG.settings[key]}`);
+        }
+
+        // =====================================================================
+        // 4. USER MANAGEMENT
+        // =====================================================================
+        function openUserModal() {
+            document.getElementById('userModal').classList.add('active');
+            renderUserList();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function renderUserList() {
+            const html = state.users.map(u => `
+                <div style="display:flex; justify-content:space-between; padding:10px; background:#f8fafc; border-radius:6px; margin-bottom:5px;">
+                    <div>
+                        <div style="font-weight:500;">${u.name}</div>
+                        <div style="font-size:12px; color:var(--text-secondary);">${u.email} • ${u.role}</div>
+                    </div>
+                    ${u.role !== 'admin' ? `<button class="btn btn-outline" style="padding:5px 10px; font-size:12px; color:var(--danger);" onclick="deleteUser('${u.email}')">Delete</button>` : ''}
+                </div>
+            `).join('');
+            document.getElementById('userListDisplay').innerHTML = html || '<p>No users found.</p>';
+        }
+
+        function addUser() {
+            const email = document.getElementById('newUserEmail').value;
+            const role = document.getElementById('newUserRole').value;
+            if (email) {
+                state.users.push({ email, role, name: email.split('@')[0] });
+                localStorage.setItem('lab_users', JSON.stringify(state.users));
+                document.getElementById('newUserEmail').value = '';
+                renderUserList();
+            }
+        }
+
+        function deleteUser(email) {
+            state.users = state.users.filter(u => u.email !== email);
+            localStorage.setItem('lab_users', JSON.stringify(state.users));
+            renderUserList();
+        }
+
+        function addNewSite() {
+            const name = prompt("Site Name:");
+            const path = prompt("Path (e.g., /new-page.html):");
+            if (name && path) {
+                LAB_CONFIG.sites.push({ name, path, icon: '' });
+                renderSidebar();
+            }
+        }
+
+        // =====================================================================
+        // 5. AUTH & UTILS
+        // =====================================================================
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            if (email) {
+                state.user = state.users.find(u => u.email === email) || { email, role: 'admin', name: 'User' };
+                document.getElementById('authGate').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('userEmail').textContent = state.user.email;
+                document.getElementById('userRole').textContent = state.user.role.toUpperCase();
+                document.getElementById('userAvatar').textContent = state.user.name.charAt(0).toUpperCase();
+                initApp();
+            }
+        }
+
+        function handleLogout() {
+            state.user = null;
+            document.getElementById('appContainer').classList.add('hidden');
+            document.getElementById('authGate').classList.remove('hidden');
+        }
+
+        function handleFiles(files) {
+            const list = document.getElementById('fileList');
+            list.innerHTML = Array.from(files).map(f => `<div style="padding:5px; background:#f1f5f9; border-radius:4px; margin-bottom:5px; font-size:13px;">📄 ${f.name}</div>`).join('');
+        }
+
+        function processFiles() {
+            document.getElementById('resultCard').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
