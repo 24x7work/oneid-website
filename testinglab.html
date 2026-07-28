@@ -8,21 +8,17 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #0f172a; }
 
-/* HEADER WITH HAMBURGER */
 .app-header {
   background: white; border-bottom: 1px solid #e2e8f0; padding: 15px 20px;
   display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;
 }
 .hamburger {
   background: none; border: none; font-size: 24px; cursor: pointer; padding: 5px;
-  display: flex; align-items: center; justify-content: center;
 }
 .brand { font-weight: 700; font-size: 18px; color: #4f46e5; }
 
-/* LAYOUT */
 .app-container { display: flex; min-height: calc(100vh - 60px); }
 
-/* SIDEBAR */
 #sidebar {
   position: fixed; left: 0; top: 60px; bottom: 0; width: 280px;
   background: white; border-right: 1px solid #e2e8f0;
@@ -49,7 +45,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .nav-item .icon { font-size: 20px; margin-right: 12px; min-width: 24px; }
 
 .user-section {
-  padding: 20px; border-top: 1px solid #e2e8f0; margin-top: auto;
+  padding: 20px; border-top: 1px solid #e2e8f0;
 }
 .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .avatar {
@@ -65,7 +61,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   font-size: 13px; padding: 5px 0;
 }
 
-/* MAIN CONTENT */
 #mainContent {
   flex: 1; padding: 20px; width: 100%;
 }
@@ -88,11 +83,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
 .btn {
   padding: 12px 24px; border-radius: 8px; border: none;
-  font-weight: 600; cursor: pointer; font-size: 14px; width: 100%;
-  margin-top: 20px;
+  font-weight: 600; cursor: pointer; font-size: 14px;
 }
 .btn-primary { background: #4f46e5; color: white; }
 .btn-primary:hover { background: #4338ca; }
+.btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #0f172a; }
+.btn-success { background: #10b981; color: white; }
 
 .setting-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -111,7 +107,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 }
 .toggle.on::after { left: 25px; }
 
-/* MODAL */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.5);
   display: none; align-items: center; justify-content: center;
@@ -128,7 +123,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;
 }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
-.btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #0f172a; }
 
 .hidden { display: none !important; }
 
@@ -147,9 +141,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
 <!-- HEADER -->
 <div class="app-header">
-  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <button class="hamburger" onclick="toggleSidebar()"></button>
   <div class="brand">ONEID Lab Hub</div>
-  <div style="width: 34px;"></div> <!-- Spacer for balance -->
+  <div style="width: 34px;"></div>
 </div>
 
 <!-- SIDEBAR OVERLAY -->
@@ -239,6 +233,12 @@ let state = {
   users: JSON.parse(localStorage.getItem('lab_users')) || [{ email: 'admin@24x7.work', role: 'admin', name: 'Admin' }]
 };
 
+// Load saved sites from localStorage
+const savedSites = localStorage.getItem('lab_sites');
+if (savedSites) {
+  LAB_CONFIG.sites = JSON.parse(savedSites);
+}
+
 function initApp() {
   renderSites();
   switchTab('migration');
@@ -252,7 +252,7 @@ function toggleSidebar() {
 function renderSites() {
   const html = LAB_CONFIG.sites.map(site => `
     <div class="nav-item" onclick="window.open('${site.path}', '_blank')">
-      <div class="icon">${site.icon}</div>
+      <div class="icon">${site.icon || '🌐'}</div>
       <div>${site.name}</div>
     </div>
   `).join('');
@@ -267,7 +267,6 @@ function switchTab(tabId) {
   if (tabId === 'migration') renderMigrationTab();
   else if (tabId === 'settings') renderSettingsTab();
   
-  // Close sidebar on mobile after selection
   if (window.innerWidth < 768) {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('show');
@@ -275,6 +274,9 @@ function switchTab(tabId) {
 }
 
 function renderMigrationTab() {
+  const isAdmin = state.user && state.user.role === 'admin';
+  const deployButton = isAdmin ? '<button class="btn btn-success" onclick="deployToSupabase()"> Deploy</button>' : '';
+  
   document.getElementById('tabContent').innerHTML = `
     <h1 class="page-title">Migration Converter</h1>
     <p class="page-subtitle">Upload PDF/DOCX to generate PostgreSQL scripts.</p>
@@ -287,15 +289,16 @@ function renderMigrationTab() {
       </div>
       <input type="file" id="fileInput" multiple style="display:none" onchange="handleFiles(this.files)">
       <div id="fileList" style="margin-top:15px;"></div>
-      <button class="btn btn-primary" onclick="processFiles()">Extract & Analyze</button>
+      <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="processFiles()">Extract & Analyze</button>
     </div>
     
     <div class="card hidden" id="resultCard">
       <h3>2. Results</h3>
       <p style="color:#10b981; margin-bottom:15px;">✅ Processing complete.</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-primary" style="flex:1; min-width:150px; margin:0;">Download ZIP</button>
-        <button class="btn btn-outline" style="flex:1; min-width:150px; margin:0;">Copy SQL</button>
+        <button class="btn btn-success" style="flex:1; min-width:150px;">Download ZIP</button>
+        <button class="btn btn-outline" style="flex:1; min-width:150px;">Copy SQL</button>
+        ${deployButton}
       </div>
     </div>
   `;
@@ -372,16 +375,20 @@ function deleteUser(email) {
 }
 
 function addNewSite() {
-  const name = prompt("Site Name:");
-  const path = prompt("Path (e.g., /new-page.html):");
-  if (name && path) {
-    LAB_CONFIG.sites.push({ name, path, icon: '🌐' });
-    renderSites();
-  }
+  const name = prompt("Site Name (e.g., Reports Dashboard):");
+  if (!name) return;
+  const path = prompt("Path (e.g., /reports.html):");
+  if (!path) return;
+  const icon = prompt("Icon (emoji, e.g., 📊):", "🌐") || "";
+  
+  LAB_CONFIG.sites.push({ name, path, icon });
+  localStorage.setItem('lab_sites', JSON.stringify(LAB_CONFIG.sites));
+  renderSites();
+  alert(`✅ "${name}" added to Site Navigator!`);
 }
 
 function handleLogin() {
-  const email = prompt("Enter email:");
+  const email = prompt("Enter email (e.g., admin@24x7.work):");
   if (email) {
     state.user = state.users.find(u => u.email === email) || { email, role: 'admin', name: 'User' };
     document.getElementById('userEmail').textContent = state.user.email;
@@ -403,6 +410,10 @@ function handleFiles(files) {
 
 function processFiles() {
   document.getElementById('resultCard').classList.remove('hidden');
+}
+
+function deployToSupabase() {
+  alert('🚀 Deploying to Supabase... (Edge Function call)');
 }
 
 // Auto-login for testing
