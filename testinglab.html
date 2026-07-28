@@ -8,7 +8,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #0f172a; }
 
-/* LOGIN SCREEN */
 #loginScreen {
   position: fixed; inset: 0; background: #f8fafc; z-index: 2000;
   display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -24,21 +23,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 }
 .login-box button {
   width: 100%; padding: 12px; background: #4f46e5; color: white;
-  border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;
+  border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
 }
 
-/* HEADER */
 .app-header {
   background: white; border-bottom: 1px solid #e2e8f0; padding: 15px 20px;
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 100;
 }
 .hamburger {
-  background: none; border: none; font-size: 24px; cursor: pointer; padding: 5px;
+  background: none; border: none; font-size: 24px; cursor: pointer;
 }
 .brand { font-weight: 700; font-size: 18px; color: #4f46e5; }
 
-/* SIDEBAR */
 #sidebar {
   position: fixed; left: 0; top: 60px; bottom: 0; width: 280px;
   background: white; border-right: 1px solid #e2e8f0;
@@ -79,7 +76,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   font-size: 13px; padding: 5px 0;
 }
 
-/* MAIN CONTENT */
 #mainContent { padding: 20px; }
 .page-title { font-size: 24px; margin-bottom: 5px; }
 .page-subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
@@ -95,8 +91,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   text-align: center; cursor: pointer; transition: all 0.2s;
 }
 .dropzone:hover { border-color: #4f46e5; background: #f8fafc; }
-.dropzone h4 { margin-bottom: 8px; color: #475569; }
-.dropzone p { color: #94a3b8; font-size: 14px; }
 
 .btn {
   padding: 12px 24px; border-radius: 8px; border: none;
@@ -105,6 +99,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .btn-primary { background: #4f46e5; color: white; }
 .btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #0f172a; }
 .btn-success { background: #10b981; color: white; }
+.btn-warning { background: #f59e0b; color: white; }
 
 .setting-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -131,18 +126,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .modal-overlay.active { display: flex; }
 .modal {
   background: white; border-radius: 12px; padding: 24px;
-  width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto;
+  width: 100%; max-width: 600px; max-height: 80vh; overflow-y: auto;
 }
 .modal h3 { margin-bottom: 20px; }
-.modal input, .modal select {
+.modal input, .modal select, .modal textarea {
   width: 100%; padding: 12px; margin-bottom: 15px;
   border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;
+  font-family: monospace;
 }
+.modal textarea { min-height: 300px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
 .hidden { display: none !important; }
 
-/* DESKTOP */
+.json-editor {
+  background: #1e293b; color: #e2e8f0; padding: 15px;
+  border-radius: 8px; font-family: monospace; font-size: 12px;
+  min-height: 400px; white-space: pre; overflow: auto;
+}
+
 @media (min-width: 768px) {
   #sidebar { transform: translateX(0); }
   #mainContent { margin-left: 280px; }
@@ -151,27 +153,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-box">
     <h2>ONEID Lab Hub</h2>
-    <input type="email" id="loginEmail" placeholder="Email (e.g., admin@24x7.work)">
+    <input type="email" id="loginEmail" placeholder="Email">
     <input type="password" id="loginPass" placeholder="Password">
     <button onclick="handleLogin()">Login</button>
   </div>
 </div>
 
-<!-- HEADER -->
 <div class="app-header">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
   <div class="brand">ONEID Lab Hub</div>
   <div style="width: 34px;"></div>
 </div>
 
-<!-- SIDEBAR OVERLAY -->
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- SIDEBAR -->
 <div id="sidebar">
   <div class="sidebar-section">
     <div class="section-title">Core Tools</div>
@@ -183,8 +181,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
       <div class="icon">⚙️</div>
       <div>Universal Settings</div>
     </div>
+    <div class="nav-item" onclick="switchTab('json')">
+      <div class="icon"></div>
+      <div>JSON Config Manager</div>
+    </div>
     <div class="nav-item" onclick="openUserModal()">
-      <div class="icon">👥</div>
+      <div class="icon"></div>
       <div>User Management</div>
     </div>
   </div>
@@ -210,12 +212,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div id="mainContent">
   <div id="tabContent"></div>
 </div>
 
-<!-- USER MODAL -->
 <div class="modal-overlay" id="userModal">
   <div class="modal">
     <h3>User Management</h3>
@@ -237,9 +237,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 const LAB_CONFIG = {
   sites: [
     { name: 'Home / Dashboard', path: '/index.html', icon: '🌐' },
-    { name: 'Login Portal', path: '/login.html', icon: '' },
-    { name: 'User Dashboard', path: '/dashboard.html', icon: '' },
-    { name: 'Main App', path: '/app.html', icon: '' }
+    { name: 'Login Portal', path: '/login.html', icon: '🔐' },
+    { name: 'User Dashboard', path: '/dashboard.html', icon: '📊' },
+    { name: 'Main App', path: '/app.html', icon: '📱' }
   ],
   settings: {
     auto_linter: true,
@@ -258,6 +258,11 @@ let state = {
 const savedSites = localStorage.getItem('lab_sites');
 if (savedSites) {
   LAB_CONFIG.sites = JSON.parse(savedSites);
+}
+
+const savedSettings = localStorage.getItem('lab_settings');
+if (savedSettings) {
+  LAB_CONFIG.settings = JSON.parse(savedSettings);
 }
 
 function handleLogin() {
@@ -306,6 +311,7 @@ function switchTab(tabId) {
   
   if (tabId === 'migration') renderMigrationTab();
   else if (tabId === 'settings') renderSettingsTab();
+  else if (tabId === 'json') renderJSONTab();
   
   if (window.innerWidth < 768) {
     document.getElementById('sidebar').classList.remove('open');
@@ -315,7 +321,7 @@ function switchTab(tabId) {
 
 function renderMigrationTab() {
   const isAdmin = state.user && state.user.role === 'admin';
-  const deployButton = isAdmin ? '<button class="btn btn-success" onclick="deployToSupabase()"> Deploy</button>' : '';
+  const deployButton = isAdmin ? '<button class="btn btn-success" onclick="deployToSupabase()">🚀 Deploy to Supabase</button>' : '';
   
   document.getElementById('tabContent').innerHTML = `
     <h1 class="page-title">Migration Converter</h1>
@@ -324,8 +330,8 @@ function renderMigrationTab() {
     <div class="card">
       <h3>1. Upload Files</h3>
       <div class="dropzone" onclick="document.getElementById('fileInput').click()">
-        <h4>Click to upload or drag & drop</h4>
-        <p>Supports .pdf, .docx, .zip</p>
+        <h4 style="margin-bottom:8px;">Click to upload or drag & drop</h4>
+        <p style="color:#94a3b8;">Supports .pdf, .docx, .zip, .txt</p>
       </div>
       <input type="file" id="fileInput" multiple style="display:none" onchange="handleFiles(this.files)">
       <div id="fileList" style="margin-top:15px;"></div>
@@ -336,7 +342,7 @@ function renderMigrationTab() {
       <h3>2. Results</h3>
       <p style="color:#10b981; margin-bottom:15px;">✅ Processing complete.</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-success" style="flex:1; min-width:150px;">📦 Download ZIP</button>
+        <button class="btn btn-success" style="flex:1; min-width:150px;"> Download ZIP</button>
         <button class="btn btn-outline" style="flex:1; min-width:150px;">📋 Copy SQL</button>
         ${deployButton}
       </div>
@@ -370,9 +376,102 @@ function renderSettingsTab() {
   `;
 }
 
+function renderJSONTab() {
+  const isAdmin = state.user && state.user.role === 'admin';
+  const jsonContent = JSON.stringify(LAB_CONFIG, null, 2);
+  
+  document.getElementById('tabContent').innerHTML = `
+    <h1 class="page-title">JSON Config Manager</h1>
+    <p class="page-subtitle">Edit configuration without code changes. Changes apply immediately.</p>
+    
+    <div class="card">
+      <h3>Current Configuration</h3>
+      <p style="font-size:12px; color:#64748b; margin-bottom:15px;">
+        Edit the JSON below to add new tools, sites, or settings. Click "Save & Apply" to update.
+      </p>
+      <textarea id="jsonEditor" class="json-editor" style="width:100%; min-height:400px; padding:15px; background:#1e293b; color:#e2e8f0; border-radius:8px; font-family:monospace; font-size:12px;">${jsonContent}</textarea>
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="btn btn-primary" onclick="saveJSON()">💾 Save & Apply</button>
+        <button class="btn btn-outline" onclick="resetJSON()">🔄 Reset to Default</button>
+        <button class="btn btn-warning" onclick="exportJSON()">📥 Export JSON</button>
+      </div>
+      <div id="jsonMessage" style="margin-top:15px; font-size:13px;"></div>
+    </div>
+    
+    <div class="card">
+      <h3>Quick Actions</h3>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="addToolViaJSON()">➕ Add New Tool</button>
+        <button class="btn btn-outline" onclick="addSiteViaJSON()">🌐 Add New Site</button>
+        <button class="btn btn-outline" onclick="addSettingViaJSON()">⚙️ Add New Setting</button>
+      </div>
+    </div>
+  `;
+}
+
 function toggleSetting(key, el) {
   LAB_CONFIG.settings[key] = !LAB_CONFIG.settings[key];
   el.classList.toggle('on');
+  localStorage.setItem('lab_settings', JSON.stringify(LAB_CONFIG.settings));
+}
+
+function saveJSON() {
+  try {
+    const newConfig = JSON.parse(document.getElementById('jsonEditor').value);
+    Object.assign(LAB_CONFIG, newConfig);
+    localStorage.setItem('lab_sites', JSON.stringify(LAB_CONFIG.sites));
+    localStorage.setItem('lab_settings', JSON.stringify(LAB_CONFIG.settings));
+    document.getElementById('jsonMessage').innerHTML = '<span style="color:#10b981;">✅ Configuration saved successfully!</span>';
+    renderSites();
+  } catch (e) {
+    document.getElementById('jsonMessage').innerHTML = '<span style="color:#ef4444;">❌ Invalid JSON: ' + e.message + '</span>';
+  }
+}
+
+function resetJSON() {
+  if (confirm('Reset to default configuration?')) {
+    localStorage.removeItem('lab_sites');
+    localStorage.removeItem('lab_settings');
+    location.reload();
+  }
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(LAB_CONFIG, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lab_config.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function addToolViaJSON() {
+  const name = prompt('Tool Name:');
+  if (!name) return;
+  const icon = prompt('Icon (emoji):', '') || '🔧';
+  LAB_CONFIG.tools = LAB_CONFIG.tools || [];
+  LAB_CONFIG.tools.push({ id: name.toLowerCase().replace(/\s+/g, '_'), name, icon, status: 'active' });
+  document.getElementById('jsonEditor').value = JSON.stringify(LAB_CONFIG, null, 2);
+  saveJSON();
+}
+
+function addSiteViaJSON() {
+  const name = prompt('Site Name:');
+  if (!name) return;
+  const path = prompt('Path (e.g., /new-page.html):');
+  if (!path) return;
+  LAB_CONFIG.sites.push({ name, path, icon: '🌐' });
+  document.getElementById('jsonEditor').value = JSON.stringify(LAB_CONFIG, null, 2);
+  saveJSON();
+}
+
+function addSettingViaJSON() {
+  const key = prompt('Setting Key (e.g., new_feature):');
+  if (!key) return;
+  LAB_CONFIG.settings[key] = true;
+  document.getElementById('jsonEditor').value = JSON.stringify(LAB_CONFIG, null, 2);
+  saveJSON();
 }
 
 function openUserModal() {
@@ -415,16 +514,13 @@ function deleteUser(email) {
 }
 
 function addNewSite() {
-  const name = prompt("Site Name (e.g., Reports Dashboard):");
+  const name = prompt('Site Name:');
   if (!name) return;
-  const path = prompt("Path (e.g., /reports.html):");
+  const path = prompt('Path (e.g., /reports.html):');
   if (!path) return;
-  const icon = prompt("Icon (emoji, e.g., 📊):", "🌐") || "";
-  
-  LAB_CONFIG.sites.push({ name, path, icon });
+  LAB_CONFIG.sites.push({ name, path, icon: '🌐' });
   localStorage.setItem('lab_sites', JSON.stringify(LAB_CONFIG.sites));
   renderSites();
-  alert(`✅ "${name}" added to Site Navigator!`);
 }
 
 function handleFiles(files) {
