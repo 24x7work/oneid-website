@@ -1,0 +1,75 @@
+{
+  "version": "1.0.0",
+  "settings": {
+    "auto_linter": true,
+    "auto_fk_fix": true,
+    "auto_naming": true,
+    "auto_indexes": true,
+    "require_login_otp": false,
+    "enable_resend": true
+  },
+  "tools": [
+    {
+      "id": "migration_converter",
+      "name": "Migration Converter",
+      "icon": "🔄",
+      "category": "core",
+      "status": "active",
+      "component": "migration-tab"
+    },
+    {
+      "id": "universal_settings",
+      "name": "Universal Settings",
+      "icon": "⚙️",
+      "category": "core",
+      "status": "active",
+      "component": "settings-tab"
+    },
+    {
+      "id": "user_management",
+      "name": "User Management",
+      "icon": "👥",
+      "category": "core",
+      "status": "active",
+      "component": "user-modal"
+    }
+  ],
+  "sites": [
+    {
+      "name": "Home / Dashboard",
+      "path": "/index.html",
+      "icon": "🌐"
+    },
+    {
+      "name": "Login Portal",
+      "path": "/login.html",
+      "icon": "🔐"
+    },
+    {
+      "name": "User Dashboard",
+      "path": "/dashboard.html",
+      "icon": "📊"
+    },
+    {
+      "name": "Main App",
+      "path": "/app.html",
+      "icon": "📱"
+    }
+  ],
+  "plugins": [
+    {
+      "id": "android_lab",
+      "name": "Android App Lab",
+      "icon": "",
+      "status": "coming_soon",
+      "description": "Push Notification Tester, Deep Link Generator"
+    },
+    {
+      "id": "api_tester",
+      "name": "API Endpoint Tester",
+      "icon": "🔌",
+      "status": "coming_soon",
+      "description": "Test Supabase Edge Functions"
+    }
+  ]
+}
