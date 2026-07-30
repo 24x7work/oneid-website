@@ -748,9 +748,81 @@ function renderPreview() { document.getElementById('sqlPreview').textContent = s
 
 function copySQL() { navigator.clipboard.writeText(state.convertedSql); alert('✅ SQL copied!'); }
 function copyFullSchema() { navigator.clipboard.writeText(state.convertedSql); alert('✅ Full Schema copied! Ready for Supabase SQL Editor.'); }
-function parseError() {
+async function parseError() {
   const err = document.getElementById('supabaseErrorInput').value;
-  if (err) alert('Parsed: "' + err + '" — highlight logic ready.');
+  const sqlPreview = document.getElementById('sqlPreview');
+  
+  if (!err) { alert('️ Please paste an error first!'); return; }
+  if (!sqlPreview) { alert('️ No SQL to fix!'); return; }
+  
+  const currentSql = sqlPreview.textContent;
+  const providers = LAB_CONFIG.ai_providers?.providers || [];
+  
+  if (providers.length === 0) { alert('⚠️ No AI providers configured!'); return; }
+  
+  alert(` Starting AI Fix...\n\nError: ${err.substring(0, 80)}...`);
+  
+  for (let i = 0; i < providers.length; i++) {
+    const provider = providers[i];
+    alert(`📡 Attempt ${i+1}: Trying ${provider.name}...`);
+    
+    try {
+      let response, fixedSql = '';
+      
+      if (provider.name === 'Groq') {
+        response = await fetch(provider.endpoint + '/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${provider.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: provider.model,
+            messages: [
+              { role: 'system', content: 'You are a PostgreSQL expert. Fix SQL errors.' },
+              { role: 'user', content: `Fix this error:\n\nError: ${err}\n\nSQL:\n${currentSql}\n\nReturn ONLY corrected SQL.` }
+            ],
+            temperature: 0.3
+          })
+        });
+        const data = await response.json();
+        fixedSql = data.choices?.[0]?.message?.content || '';
+      } else if (provider.name === 'Google Gemini') {
+        response = await fetch(provider.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `Fix this error:\n\nError: ${err}\n\nSQL:\n${currentSql}\n\nReturn ONLY corrected SQL.` }] }],
+            generationConfig: { temperature: 0.3 }
+          })
+        });
+        const data = await response.json();
+        fixedSql = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      } else if (provider.name === 'Mistral') {
+        response = await fetch(provider.endpoint + '/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${provider.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: provider.model,
+            messages: [
+              { role: 'system', content: 'You are a PostgreSQL expert.' },
+              { role: 'user', content: `Fix this error:\n\nError: ${err}\n\nSQL:\n${currentSql}\n\nReturn ONLY corrected SQL.` }
+            ],
+            temperature: 0.3
+          })
+        });
+        const data = await response.json();
+        fixedSql = data.choices?.[0]?.message?.content || '';
+      }
+      
+      if (fixedSql) {
+        sqlPreview.textContent = fixedSql;
+        alert(`✅ ${provider.name} fixed the SQL!`);
+        return;
+      }
+    } catch (e) {
+      alert(`❌ ${provider.name} failed: ${e.message}`);
+    }
+  }
+  
+  alert('❌ All AI providers failed!');
 }
 
 async function deployToSupabase() {
