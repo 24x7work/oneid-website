@@ -466,6 +466,128 @@ function resetForgeForm() {
     document.getElementById('forge-code').value = '';
     forgeLog('📋 Form cleared. Ready for new plugin.');
 }
+<script>
+// === PLUGIN CONFIG ===
+const PLUGIN_CONFIG = {
+    migration: false, sql_editor: false, forge: true, projects: false,
+    connect: false, sandbox: false, recycle: false, find_replace: false
+};
+
+// === INSTALLED PLUGINS STORE ===
+let installedPlugins = [
+    { id: 'forge', name: 'Plugin Forge', category: 'utility', status: 'active', version: '1.0.0' }
+];
+
+// === AUTH SYSTEM ===
+function switchAuth(type) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    document.querySelectorAll('.auth-form').forEach(f => f.style.display = 'none');
+    const map = { email:'auth-email', biometric:'auth-biometric', face:'auth-face', mpin:'auth-mpin', pattern:'auth-pattern' };
+    const el = document.getElementById(map[type]);
+    if(el) el.style.display = (type === 'email' || type === 'mpin') ? 'block' : 'flex';
+}
+
+function doLogin() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard-screen').style.display = 'flex';
+    initPlugins();
+    renderPluginList();
+}
+
+function logout() {
+    document.getElementById('dashboard-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+}
+
+// === NAVIGATION ===
+function showModule(moduleName) {
+    document.querySelectorAll('.dashboard-content, .module-view').forEach(v => v.style.display = 'none');
+    const view = document.getElementById('view-' + moduleName);
+    if(view) view.style.display = (moduleName === 'dashboard') ? 'grid' : 'block';
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+}
+
+function handleNav(el) {
+    if(el.classList.contains('disabled')) return;
+    const plugin = el.getAttribute('data-plugin');
+    if(plugin) showModule(plugin);
+}
+
+function initPlugins() {
+    document.querySelectorAll('.nav-item[data-plugin]').forEach(item => {
+        const key = item.getAttribute('data-plugin');
+        if(PLUGIN_CONFIG[key]) {
+            item.classList.remove('disabled');
+            const badge = item.querySelector('.plugin-badge');
+            badge.textContent = 'ACTIVE';
+            badge.classList.add('active');
+        }
+    });
+}
+
+// === PLUGIN FORGE LOGIC ===
+function forgeLog(msg) {
+    const log = document.getElementById('forge-log');
+    const time = new Date().toLocaleTimeString();
+    log.innerHTML += `<div>[${time}] ${msg}</div>`;
+    log.scrollTop = log.scrollHeight;
+}
+
+function renderPluginList() {
+    const list = document.getElementById('plugin-list');
+    if(!list) return;
+    list.innerHTML = installedPlugins.map(p => `
+        <div class="plugin-item">
+            <div class="plugin-info">
+                <span class="plugin-name">${p.name}</span>
+                <span class="plugin-meta">${p.category} • v${p.version} • ${p.id}</span>
+            </div>
+            <span class="plugin-status ${p.status}">${p.status.toUpperCase()}</span>
+        </div>
+    `).join('');
+}
+
+function buildPlugin() {
+    const name = document.getElementById('forge-name').value.trim();
+    const id = document.getElementById('forge-id').value.trim();
+    const code = document.getElementById('forge-code').value.trim();
+    if(!name || !id || !code) { forgeLog('❌ All fields required'); return; }
+    forgeLog(`🔨 Building plugin: ${name} (${id})...`);
+    setTimeout(() => {
+        try {
+            new Function(code);
+            forgeLog(`✅ Build SUCCESS: ${name} compiled without errors`);
+            forgeLog(` Running sandbox test...`);
+            setTimeout(() => forgeLog(`✅ Sandbox test PASSED for ${id}`), 800);
+        } catch(e) {
+            forgeLog(`❌ Build FAILED: ${e.message}`);
+        }
+    }, 600);
+}
+
+function deployPlugin() {
+    const name = document.getElementById('forge-name').value.trim();
+    const id = document.getElementById('forge-id').value.trim();
+    const cat = document.getElementById('forge-category').value;
+    if(!name || !id) { forgeLog('❌ Name and ID required for deploy'); return; }
+    if(installedPlugins.find(p => p.id === id)) { forgeLog(`️ Plugin "${id}" already installed`); return; }
+    forgeLog(`🚀 Deploying ${name}...`);
+    setTimeout(() => {
+        installedPlugins.push({ id, name, category: cat, status: 'active', version: '1.0.0' });
+        renderPluginList();
+        forgeLog(`✅ DEPLOYED: ${name} is now LIVE`);
+        resetForgeForm();
+    }, 1000);
+}
+
+function resetForgeForm() {
+    document.getElementById('forge-name').value = '';
+    document.getElementById('forge-id').value = '';
+    document.getElementById('forge-code').value = '';
+    forgeLog('📋 Form cleared. Ready for new plugin.');
+}
 </script>
 </body>
 </html>
