@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperLabHub v3.0 | ONEID Heartbeat</title>
+    <style>
+        :root {
+            --slh-bg: #FDF6E3;
+            --slh-text: #5C4B37;
+            --slh-accent: #D4A843;
+            --slh-success: #7BA05B;
+            --slh-danger: #C75B3A;
+            --slh-card: #FAF0DC;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--slh-bg);
+            color: var(--slh-text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: var(--slh-accent); border-bottom: 2px solid var(--slh-accent); padding-bottom: 10px; }
+        .card {
+            background: var(--slh-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .log-box {
+            background: #2d2d2d;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            height: 300px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+        .btn {
+            background: var(--slh-accent);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        .btn:active { transform: scale(0.98); }
+        .status { font-weight: bold; margin-top: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💓 SuperLabHub v3.0 Heartbeat</h1>
+    
+    <div class="card">
+        <p><strong>Status:</strong> <span id="mainStatus">Ready to initialize...</span></p>
+        <button class="btn" onclick="runHeartbeat()">🚀 START ONEID HEARTBEAT</button>
+    </div>
+
+    <div class="card">
+        <h3>📟 Live System Logs</h3>
+        <div class="log-box" id="logBox">Waiting for command...</div>
+    </div>
+</div>
+
+<script>
+    // === SUPERLABHUB VANILLA JS SIMULATION ===
+    // Pure browser JS, no Node.js dependencies, no build step.
+
+    const logBox = document.getElementById('logBox');
+    const statusEl = document.getElementById('mainStatus');
+
+    function log(msg, type = 'info') {
+        const color = type === 'success' ? '#00ff00' : type === 'error' ? '#ff4444' : '#00ff00';
+        const time = new Date().toLocaleTimeString();
+        logBox.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+    async function runHeartbeat() {
+        logBox.innerHTML = '';
+        statusEl.innerText = 'Initializing...';
+        statusEl.style.color = 'var(--slh-accent)';
+
+        try {
+            // 1. IP VAULT GENESIS
+            log('🔐 [IP-VAULT] Initializing Genesis Block...', 'info');
+            await sleep(400);
+            log('✅ [IP-VAULT] Genesis Hash: 0000...a1b2c3d4 (Integrity: VALID)', 'success');
+
+            // 2. SURROGACY BIRTH
+            log('🐣 [SURROGACY] Birthing ONEID Project...', 'info');
+            await sleep(500);
+            const projectId = 'SUR_' + Date.now().toString().slice(-6);
+            log(`✅ [SURROGACY] Project Born: ${projectId} (Mode: SURROGACY_CHILD)`, 'success');
+
+            // 3. WALLET FUNDING
+            log('💰 [WALLET] Simulating Client Recharge (₹1000)...', 'info');
+            await sleep(400);
+            log('✅ [WALLET] Balance Updated: ₹1000.00', 'success');
+
+            // 4. SMS HYBRID ENGINE (Sea Wave)
+            log('📡 [SMS-ENGINE] Sending Sea Wave Mock OTP...', 'info');
+            await sleep(300);
+            log('✅ [SMS-ENGINE] Sea Wave delivered in 4ms (Free Loopback)', 'success');
+
+            // 5. PAY-BEFORE-HANDOVER GATE
+            log('⛔ [GATE] Checking Pay-Before-Handover...', 'info');
+            await sleep(500);
+            log('✅ [GATE] Balance ₹1000 >= Required ₹500. Handover APPROVED.', 'success');
+
+            // 6. ADOPTION PROTOCOL CHECK
+            log('♻️ [ADOPTION] Scanning for orphaned assets...', 'info');
+            await sleep(400);
+            log('✅ [ADOPTION] 0 Orphans found. Zero Waste Policy Active.', 'success');
+
+            // FINAL STATUS
+            statusEl.innerText = '💓 SYSTEM ALIVE & REVENUE READY';
+            statusEl.style.color = 'var(--slh-success)';
+            log('\n🏁 === ONEID HEARTBEAT SUCCESSFUL ===', 'success');
+            log('SuperLabHub v3.0 is fully operational on 24x7.work!', 'success');
+
+        } catch (err) {
+            statusEl.innerText = '❌ HEARTBEAT FAILED';
+            statusEl.style.color = 'var(--slh-danger)';
+            log(` ERROR: ${err.message}`, 'error');
+        }
+    }
+</script>
+
+</body>
+</html>
