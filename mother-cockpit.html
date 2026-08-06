@@ -5,90 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SuperLabHub v3.0 | Command Center</title>
     <style>
-        :root {
-            --bg: #FDF6E3; --text: #5C4B37; --accent: #D4A843; --card: #FAF0DC;
-            --success: #7BA05B; --danger: #C75B3A; --border: #E6D5B8; --disabled: #ccc;
-        }
+        :root { --bg: #FDF6E3; --text: #5C4B37; --accent: #D4A843; --card: #FAF0DC; --success: #7BA05B; --danger: #C75B3A; --border: #E6D5B8; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; }
         #login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .login-card { background: var(--card); padding: 40px 30px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .login-card { background: var(--card); padding: 40px 30px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
         .login-logo { font-size: 2em; margin-bottom: 10px; }
         .login-title { font-size: 1.5em; color: var(--accent); margin-bottom: 25px; font-weight: bold; }
         .auth-tabs { display: flex; gap: 5px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
         .auth-tab { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85em; white-space: nowrap; background: var(--bg); border: 1px solid var(--border); }
-        .auth-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-        .auth-input { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); font-size: 1em; margin-bottom: 15px; outline: none; }
-        .auth-input:focus { border-color: var(--accent); }
+        .auth-tab.active { background: var(--accent); color: white; }
+        .auth-input { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); font-size: 1em; margin-bottom: 15px; }
         .login-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; }
-        .login-btn:active { transform: scale(0.98); }
-        .biometric-area { display: none; flex-direction: column; align-items: center; gap: 15px; }
-        .bio-icon { font-size: 3em; cursor: pointer; padding: 20px; background: var(--bg); border-radius: 50%; border: 2px dashed var(--accent); }
-        .mpin-dots { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
-        .dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--accent); }
-        .dot.filled { background: var(--accent); }
-        #dashboard-screen { display: none; flex-direction: column; min-height: 100vh; }
-        .sidebar { width: 100%; background: var(--card); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 10px; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
-        .sidebar::-webkit-scrollbar { display: none; }
-        .logo { font-size: 1.1em; font-weight: bold; color: var(--accent); margin-right: 20px; display: flex; align-items: center; flex-shrink: 0; }
-        .nav-item { padding: 8px 15px; margin-right: 5px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9em; flex-shrink: 0; transition: 0.2s; }
+        .sidebar { width: 100%; background: var(--card); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 10px; white-space: nowrap; }
+        .logo { font-size: 1.1em; font-weight: bold; color: var(--accent); margin-right: 20px; display: flex; align-items: center; }
+        .nav-item { padding: 8px 15px; margin-right: 5px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
         .nav-item:hover, .nav-item.active { background: var(--bg); color: var(--accent); font-weight: bold; }
-        .nav-item.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+        .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
         .plugin-badge { font-size: 0.6em; background: var(--accent); color: white; padding: 2px 5px; border-radius: 4px; margin-left: 5px; }
         .plugin-badge.active { background: var(--success); }
         .topbar { display: flex; flex-direction: column; gap: 10px; padding: 15px; background: var(--bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
-        .search-box { background: var(--card); padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: center; width: 100%; }
-        .search-box input { border: none; background: transparent; outline: none; width: 100%; color: var(--text); font-size: 1em; }
-        .top-icons { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
-        .icon-badge { background: var(--card); padding: 6px 12px; border-radius: 15px; display: flex; align-items: center; gap: 5px; font-size: 0.85em; white-space: nowrap; border: 1px solid var(--border); }
-        .dashboard-content { padding: 15px; display: grid; grid-template-columns: 1fr; gap: 15px; flex: 1; }
-        .guts-brain { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
-        .flow-container { display: flex; justify-content: space-around; align-items: center; margin: 20px 0; }
-        .flow-item { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.8em; }
-        .flow-icon { font-size: 2em; }
-        .arrow { font-size: 1.5em; color: var(--accent); }
-        .stats-row { display: flex; justify-content: center; margin-top: 15px; font-size: 0.9em; background: var(--bg); padding: 10px; border-radius: 8px; }
+        .search-box { background: var(--card); padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border); width: 100%; }
+        .top-icons { display: flex; gap: 10px; }
+        .icon-badge { background: var(--card); padding: 6px 12px; border-radius: 15px; font-size: 0.85em; border: 1px solid var(--border); }
+        .dashboard-content { padding: 15px; display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .guts-brain { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; }
+        .flow-container { display: flex; justify-content: space-around; margin: 20px 0; }
+        .flow-item { display: flex; flex-direction: column; align-items: center; font-size: 0.8em; }
         .stat-val { font-weight: bold; color: var(--accent); }
-        .bottom-cards { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
-        .b-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-        .b-card h4 { color: var(--accent); margin-bottom: 10px; font-size: 1em; }
-        .right-panel { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--border); }
-        .yard-flow { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 15px; }
-        .yard-step { background: var(--bg); padding: 10px; border-radius: 8px; width: 100%; text-align: center; font-size: 0.9em; border: 1px solid var(--border); }
-        .qwen-bot { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; padding: 10px 15px; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; font-weight: bold; z-index: 200; font-size: 0.9em; }
-        .module-view { display: none; padding: 15px; flex: 1; }
-        .forge-container { background: var(--card); border-radius: 15px; border: 1px solid var(--border); padding: 20px; }
-        .forge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .forge-header h2 { color: var(--accent); font-size: 1.3em; }
-        .forge-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .forge-form label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
-        .forge-form input, .forge-form select, .forge-form textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); font-size: 0.95em; margin-bottom: 15px; outline: none; font-family: inherit; }
-        .forge-form textarea { min-height: 120px; font-family: 'Courier New', monospace; font-size: 0.85em; resize: vertical; }
-        .forge-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        .forge-btn { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 0.95em; flex: 1; min-width: 120px; }
+        .bottom-cards { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .b-card { background: var(--card); padding: 15px; border-radius: 12px; }
+        .module-view { display: none; padding: 15px; }
+        .forge-container { background: var(--card); border-radius: 15px; padding: 20px; }
+        .forge-form input, .forge-form select, .forge-form textarea { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        .forge-form textarea { min-height: 120px; font-family: monospace; }
+        .forge-btn { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-right: 10px; }
         .forge-btn.primary { background: var(--accent); color: white; }
         .forge-btn.success { background: var(--success); color: white; }
-        .forge-btn:active { transform: scale(0.98); }
-        .installed-plugins { margin-top: 20px; }
-        .installed-plugins h3 { color: var(--accent); margin-bottom: 10px; font-size: 1.1em; }
-        .plugin-list { display: flex; flex-direction: column; gap: 10px; }
-        .plugin-item { background: var(--bg); padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .plugin-info { display: flex; flex-direction: column; gap: 3px; }
-        .plugin-name { font-weight: bold; font-size: 0.95em; }
-        .plugin-meta { font-size: 0.8em; opacity: 0.7; }
+        .plugin-item { background: var(--bg); padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .plugin-status { padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: bold; }
         .plugin-status.active { background: var(--success); color: white; }
-        .forge-log { background: #2d2d2d; color: #00ff00; font-family: 'Courier New', monospace; padding: 15px; border-radius: 8px; height: 150px; overflow-y: auto; margin-top: 15px; font-size: 0.8em; }
+        .forge-log { background: #2d2d2d; color: #00ff00; padding: 15px; border-radius: 8px; height: 150px; overflow-y: auto; margin-top: 15px; font-family: monospace; font-size: 0.8em; }
         @media (min-width: 768px) {
-            #dashboard-screen { flex-direction: row; }
-            .sidebar { width: 260px; flex-direction: column; overflow-y: auto; border-right: 1px solid var(--border); border-bottom: none; white-space: normal; padding: 20px; }
+            body { display: flex; }
+            .sidebar { width: 260px; flex-direction: column; overflow-y: auto; border-right: 1px solid var(--border); border-bottom: none; }
             .nav-item { margin-right: 0; margin-bottom: 5px; width: 100%; }
-            .dashboard-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-            .topbar { flex-direction: row; justify-content: space-between; align-items: center; }
-            .search-box { width: 300px; }
+            .topbar { flex-direction: row; justify-content: space-between; }
             .dashboard-content { grid-template-columns: 2fr 1fr; }
             .bottom-cards { grid-template-columns: repeat(3, 1fr); }
-            .forge-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -100,206 +64,131 @@
         <div class="auth-tabs">
             <div class="auth-tab active" onclick="switchAuth('email')">📧 Email</div>
             <div class="auth-tab" onclick="switchAuth('biometric')">👆 Biometric</div>
-            <div class="auth-tab" onclick="switchAuth('face')">📷 Face ID</div>
             <div class="auth-tab" onclick="switchAuth('mpin')">🔢 MPIN</div>
-            <div class="auth-tab" onclick="switchAuth('pattern')">🔲 Pattern</div>
         </div>
-        <div id="auth-email" class="auth-form">
-            <input type="email" class="auth-input" placeholder="Email Address">
-            <input type="password" class="auth-input" placeholder="Password">
-            <button class="login-btn" onclick="doLogin()"> Secure Login</button>
-        </div>
-        <div id="auth-biometric" class="auth-form biometric-area" style="display:none;">
-            <div class="bio-icon" onclick="doLogin()">👆</div><p>Tap to authenticate</p>
-        </div>
-        <div id="auth-face" class="auth-form biometric-area" style="display:none;">
-            <div class="bio-icon" onclick="doLogin()">📷</div><p>Look at camera</p>
-        </div>
-        <div id="auth-mpin" class="auth-form" style="display:none;">
-            <div class="mpin-dots"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div></div>
-            <input type="number" class="auth-input" placeholder="Enter 4-digit MPIN" maxlength="4" style="text-align:center; letter-spacing:10px; font-size:1.5em;">
-            <button class="login-btn" onclick="doLogin()"> Verify MPIN</button>
-        </div>
-        <div id="auth-pattern" class="auth-form biometric-area" style="display:none;">
-            <div style="font-size:3em; cursor:pointer;" onclick="doLogin()">🔲</div><p>Draw unlock pattern</p>
-        </div>
+        <div id="auth-email"><input type="email" class="auth-input" placeholder="Email"><input type="password" class="auth-input" placeholder="Password"><button class="login-btn" onclick="doLogin()"> Login</button></div>
+        <div id="auth-biometric" style="display:none;"><div style="font-size:3em;cursor:pointer;" onclick="doLogin()">👆</div></div>
+        <div id="auth-mpin" style="display:none;"><input type="number" class="auth-input" placeholder="MPIN" maxlength="4"><button class="login-btn" onclick="doLogin()"> Verify</button></div>
     </div>
 </div>
 
-<div id="dashboard-screen">
+<div id="dashboard-screen" style="display:none;flex-direction:column;min-height:100vh;">
     <nav class="sidebar">
         <div class="logo">⚡ SuperLabHub</div>
-        <div class="nav-item active" data-module="dashboard" onclick="showModule('dashboard')">📊 Dashboard</div>
-        <div class="nav-item disabled" data-plugin="migration" onclick="handleNav(this)">🔄 Migration<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item disabled" data-plugin="sql_editor" onclick="handleNav(this)">📱 SQL Editor<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item" data-plugin="forge" onclick="handleNav(this)"> Plugin Forge<span class="plugin-badge active">ACTIVE</span></div>
-        <div class="nav-item disabled" data-plugin="projects" onclick="handleNav(this)">🗄️ Projects<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item" data-module="settings" onclick="showModule('settings')">⚙️ Settings</div>
-        <div class="nav-item disabled" data-plugin="connect" onclick="handleNav(this)">🌐 Connect<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item disabled" data-plugin="sandbox" onclick="handleNav(this)">🧪 Sandbox<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item" data-module="guide" onclick="showModule('guide')"> User Guide</div>
-        <div class="nav-item disabled" data-plugin="recycle" onclick="handleNav(this)">♻️ Recycle<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item disabled" data-plugin="find_replace" onclick="handleNav(this)">🔍 Find & Replace<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item active" onclick="showModule('dashboard')">📊 Dashboard</div>
+        <div class="nav-item disabled" data-plugin="migration" onclick="showPlugin('migration')">🔄 Migration<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item disabled" data-plugin="sql_editor" onclick="showPlugin('sql_editor')"> SQL Editor<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item" data-plugin="forge" onclick="showPlugin('forge')">🔌 Plugin Forge<span class="plugin-badge active">ACTIVE</span></div>
+        <div class="nav-item" data-plugin="projects" onclick="showPlugin('projects')">🗄️ Projects<span class="plugin-badge active">ACTIVE</span></div>
+        <div class="nav-item" data-module="settings" onclick="showModule('settings')">️ Settings</div>
+        <div class="nav-item disabled" data-plugin="sandbox" onclick="showPlugin('sandbox')">🧪 Sandbox<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item" data-module="guide" onclick="showModule('guide')">📄 Guide</div>
+        <div class="nav-item disabled" data-plugin="recycle" onclick="showPlugin('recycle')">♻️ Recycle<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item" data-plugin="find_replace" onclick="showPlugin('find_replace')">🔍 Find & Replace<span class="plugin-badge active">ACTIVE</span></div>
     </nav>
-    <div class="dashboard-wrapper">
+    <div style="flex:1;display:flex;flex-direction:column;">
         <header class="topbar">
-            <div class="search-box"> <input type="text" placeholder="Search modules..."></div>
+            <div class="search-box">🔍 <input type="text" placeholder="Search..." style="border:none;background:transparent;outline:none;width:100%;"></div>
             <div class="top-icons">
                 <div class="icon-badge">📱 QR: Active</div>
                 <div class="icon-badge">💰 ₹2,450</div>
-                <div class="icon-badge" onclick="logout()" style="cursor:pointer;">🚪 Logout</div>
+                <div class="icon-badge" onclick="logout()">🚪 Logout</div>
             </div>
         </header>
         <div id="view-dashboard" class="dashboard-content">
-            <div class="center-panel">
+            <div>
                 <div class="guts-brain">
-                    <h3 style="color:var(--accent); margin-bottom:10px;">GUTS BRAIN | REEs Refinery</h3>
+                    <h3 style="color:var(--accent);">GUTS BRAIN | REEs Refinery</h3>
                     <div class="flow-container">
-                        <div class="flow-item"><div class="flow-icon">🪨</div>Raw Data<br><span class="stat-val">12.4 TB</span></div>
-                        <div class="arrow">➡️</div>
-                        <div class="flow-item"><div class="flow-icon">🧠</div>Guts Brain<br><span style="font-size:0.8em">Processing</span></div>
-                        <div class="arrow">➡️</div>
-                        <div class="flow-item"><div class="flow-icon">💎</div>REEs<br><span class="stat-val">340 MB</span></div>
+                        <div class="flow-item">🪨<br>Raw<br><span class="stat-val">12.4 TB</span></div>
+                        <div style="font-size:2em;color:var(--accent);">➡️</div>
+                        <div class="flow-item">🧠<br>Brain<br>Processing</div>
+                        <div style="font-size:2em;color:var(--accent);">➡️</div>
+                        <div class="flow-item"><br>REEs<br><span class="stat-val">340 MB</span></div>
                     </div>
-                    <div class="stats-row">Waste Recycled: <span class="stat-val">94.7%</span></div>
                 </div>
-                <div class="bottom-cards">
-                    <div class="b-card"><h4>⚡ Fuel Core</h4><div style="margin-top:10px;font-size:0.9em;">🌊 Sea Wave: <span style="color:#4A90E2">██████</span></div><div style="margin-top:5px;font-size:0.9em;">️ Sand Foot: <span style="color:#D4A843">███</span></div><div style="margin-top:5px;font-size:0.9em;">📜 Normal: <span style="color:#7BA05B">█</span></div></div>
-                    <div class="b-card"><h4>🌐 SLH Connect</h4><div style="display:flex;justify-content:space-around;margin-top:15px;font-size:1.5em;">👔 — 👨💻 — 👤</div><div style="text-align:center;font-size:0.8em;margin-top:5px;">Admin • Dev • Client</div></div>
-                    <div class="b-card"><h4>📈 Storage ROI</h4><div style="font-size:1.5em;font-weight:bold;color:var(--success);margin-top:10px;">$128/mo</div><div style="font-size:0.9em;">94.7% storage saved</div></div>
+                <div class="bottom-cards" style="margin-top:15px;">
+                    <div class="b-card"><h4>⚡ Fuel Core</h4><p>🌊 Sea Wave | 🏖️ Sand Foot | 📜 Normal</p></div>
+                    <div class="b-card"><h4>🌐 SLH Connect</h4><p>👔 — 👨‍💻 — 👤</p></div>
+                    <div class="b-card"><h4>📈 Storage ROI</h4><p style="color:var(--success);font-weight:bold;">$128/mo Saved</p></div>
                 </div>
             </div>
-            <div class="right-panel">
-                <h4 style="color:var(--accent);">Free Dumping Yard</h4>
-                <div class="yard-flow"><div class="yard-step">✅ Device Cache</div><div style="font-size:1.5em;color:var(--accent);">⬇️</div><div class="yard-step">☁️ Free Cloud Tier</div><div style="font-size:1.5em;color:var(--accent);">⬇️</div><div class="yard-step">🗄️ Client DB</div></div>
-                <div style="margin-top:20px;padding:15px;background:var(--bg);border-radius:8px;text-align:center;font-size:0.9em;border:1px dashed var(--accent);">🔍 Hyper-Pinpoint<br><strong>Find & Replace Engine</strong></div>
-            </div>
+            <div style="background:var(--card);padding:20px;border-radius:15px;"><h4 style="color:var(--accent);">Free Dumping Yard</h4><p>✅ Cache → ☁️ Cloud → 🗄️ DB</p></div>
         </div>
         <div id="view-forge" class="module-view">
             <div class="forge-container">
-                <div class="forge-header">
-                    <h2>🔌 Plugin Forge</h2>
-                    <button class="forge-btn primary" onclick="resetForgeForm()" style="flex:none;min-width:auto;padding:8px 15px;">+ New Plugin</button>
+                <h2 style="color:var(--accent);margin-bottom:15px;">🔌 Plugin Forge</h2>
+                <div class="forge-form">
+                    <input type="text" id="forge-name" placeholder="Plugin Name (e.g. Invoice Generator)">
+                    <input type="text" id="forge-id" placeholder="Plugin ID (e.g. invoice_gen)">
+                    <select id="forge-category"><option>Revenue / Billing</option><option>Data / Analytics</option><option>Utility / Tools</option></select>
+                    <textarea id="forge-code" placeholder="// Plugin code here&#10;function init() { console.log('Loaded'); }"></textarea>
+                    <button class="forge-btn success" onclick="buildPlugin()">🔨 Build & Test</button>
+                    <button class="forge-btn primary" onclick="deployPlugin()">🚀 Deploy</button>
                 </div>
-                <div class="forge-grid">
-                    <div class="forge-form">
-                        <label>Plugin Name</label>
-                        <input type="text" id="forge-name" placeholder="e.g. Invoice Generator">
-                        <label>Plugin ID (unique)</label>
-                        <input type="text" id="forge-id" placeholder="e.g. invoice_gen">
-                        <label>Category</label>
-                        <select id="forge-category">
-                            <option value="revenue">Revenue / Billing</option>
-                            <option value="communication">Communication / SMS</option>
-                            <option value="data">Data / Analytics</option>
-                            <option value="security">Security / Auth</option>
-                            <option value="utility">Utility / Tools</option>
-                        </select>
-                        <label>Plugin Code (JavaScript)</label>
-                        <textarea id="forge-code" placeholder="// Your plugin logic here&#10;function init() {&#10;  console.log('Plugin loaded');&#10;}"></textarea>
-                        <div class="forge-actions">
-                            <button class="forge-btn success" onclick="buildPlugin()"> Build & Test</button>
-                            <button class="forge-btn primary" onclick="deployPlugin()"> Deploy</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="installed-plugins">
-                            <h3>Installed Plugins</h3>
-                            <div class="plugin-list" id="plugin-list"></div>
-                        </div>
-                        <div class="forge-log" id="forge-log">[FORGE] Ready. Create your first plugin...</div>
-                    </div>
-                </div>
+                <h3 style="margin-top:20px;color:var(--accent);">Installed Plugins</h3>
+                <div id="plugin-list"></div>
+                <div class="forge-log" id="forge-log">[FORGE] Ready...</div>
             </div>
         </div>
-        <div id="view-settings" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">⚙️ Settings</h2><p style="margin-top:15px;">Global configuration panel. Coming next.</p></div></div>
-        <div id="view-guide" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);"> User Guide</h2><p style="margin-top:15px;">Documentation and tutorials. Coming next.</p></div></div>
+        <div id="view-projects" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">🗄️ Projects & DBs</h2><p style="margin-top:15px;">Project management module loaded.</p></div></div>
+        <div id="view-find_replace" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">🔍 Find & Replace</h2><p style="margin-top:15px;">Hyper-pinpoint engine active.</p></div></div>
+        <div id="view-settings" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">⚙️ Settings</h2><p style="margin-top:15px;">Configuration panel.</p></div></div>
+        <div id="view-guide" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">📄 User Guide</h2><p style="margin-top:15px;">Documentation.</p></div></div>
     </div>
 </div>
-<div class="qwen-bot" onclick="alert('Qwen Quick Help: How can I assist you?')">🤖 Ask Qwen</div>
 
 <script>
-const PLUGIN_CONFIG = { migration: false, sql_editor: false, forge: true, projects: false, connect: false, sandbox: false, recycle: false, find_replace: false };
-let installedPlugins = [{ id: 'forge', name: 'Plugin Forge', category: 'utility', status: 'active', version: '1.0.0' }];
+const PLUGIN_CONFIG = { migration:false, sql_editor:false, forge:true, projects:true, sandbox:false, recycle:false, find_replace:true };
+let installedPlugins = [
+    {id:'forge', name:'Plugin Forge', category:'utility', status:'active', version:'1.0.0'},
+    {id:'projects', name:'Projects & DBs', category:'data', status:'active', version:'1.0.0'},
+    {id:'find_replace', name:'Find & Replace Engine', category:'utility', status:'active', version:'1.0.0'}
+];
 
 function switchAuth(type) {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
     event.currentTarget.classList.add('active');
-    document.querySelectorAll('.auth-form').forEach(f => f.style.display = 'none');
-    const map = { email:'auth-email', biometric:'auth-biometric', face:'auth-face', mpin:'auth-mpin', pattern:'auth-pattern' };
-    const el = document.getElementById(map[type]);
-    if(el) el.style.display = (type === 'email' || type === 'mpin') ? 'block' : 'flex';
+    ['auth-email','auth-biometric','auth-mpin'].forEach(id=>document.getElementById(id).style.display='none');
+    if(type==='email') document.getElementById('auth-email').style.display='block';
+    else if(type==='biometric') document.getElementById('auth-biometric').style.display='block';
+    else if(type==='mpin') document.getElementById('auth-mpin').style.display='block';
 }
-function doLogin() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard-screen').style.display = 'flex';
-    initPlugins(); renderPluginList();
-}
-function logout() {
-    document.getElementById('dashboard-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-}
-function showModule(moduleName) {
-    document.querySelectorAll('.dashboard-content, .module-view').forEach(v => v.style.display = 'none');
-    const view = document.getElementById('view-' + moduleName);
-    if(view) view.style.display = (moduleName === 'dashboard') ? 'grid' : 'block';
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+function doLogin() { document.getElementById('login-screen').style.display='none'; document.getElementById('dashboard-screen').style.display='flex'; renderPluginList(); }
+function logout() { document.getElementById('dashboard-screen').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
+function showModule(name) {
+    document.querySelectorAll('.dashboard-content,.module-view').forEach(v=>v.style.display='none');
+    document.getElementById('view-'+name).style.display = name==='dashboard'?'grid':'block';
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
     event.currentTarget.classList.add('active');
 }
-function handleNav(el) {
-    if(el.classList.contains('disabled')) return;
-    const plugin = el.getAttribute('data-plugin');
-    if(plugin) showModule(plugin);
-}
-function initPlugins() {
-    document.querySelectorAll('.nav-item[data-plugin]').forEach(item => {
-        const key = item.getAttribute('data-plugin');
-        if(PLUGIN_CONFIG[key]) {
-            item.classList.remove('disabled');
-            const badge = item.querySelector('.plugin-badge');
-            badge.textContent = 'ACTIVE'; badge.classList.add('active');
-        }
-    });
-}
-function forgeLog(msg) {
-    const log = document.getElementById('forge-log');
-    const time = new Date().toLocaleTimeString();
-    log.innerHTML += `<div>[${time}] ${msg}</div>`;
-    log.scrollTop = log.scrollHeight;
+function showPlugin(name) {
+    const el = document.querySelector(`.nav-item[data-plugin="${name}"]`);
+    if(el && el.classList.contains('disabled')) return;
+    showModule(name);
 }
 function renderPluginList() {
-    const list = document.getElementById('plugin-list');
-    if(!list) return;
-    list.innerHTML = installedPlugins.map(p => `<div class="plugin-item"><div class="plugin-info"><span class="plugin-name">${p.name}</span><span class="plugin-meta">${p.category} • v${p.version} • ${p.id}</span></div><span class="plugin-status ${p.status}">${p.status.toUpperCase()}</span></div>`).join('');
+    document.getElementById('plugin-list').innerHTML = installedPlugins.map(p=>`<div class="plugin-item"><div><strong>${p.name}</strong><br><small>${p.category} • v${p.version}</small></div><span class="plugin-status active">ACTIVE</span></div>`).join('');
 }
 function buildPlugin() {
-    const name = document.getElementById('forge-name').value.trim();
-    const id = document.getElementById('forge-id').value.trim();
-    const code = document.getElementById('forge-code').value.trim();
-    if(!name || !id || !code) { forgeLog('❌ All fields required'); return; }
-    forgeLog(`🔨 Building plugin: ${name} (${id})...`);
-    setTimeout(() => {
-        try { new Function(code); forgeLog(`✅ Build SUCCESS: ${name} compiled`); forgeLog(`🧪 Running sandbox test...`); setTimeout(() => forgeLog(`✅ Sandbox test PASSED for ${id}`), 800); } 
-        catch(e) { forgeLog(`❌ Build FAILED: ${e.message}`); }
-    }, 600);
+    const name=document.getElementById('forge-name').value, id=document.getElementById('forge-id').value, code=document.getElementById('forge-code').value;
+    if(!name||!id||!code) { document.getElementById('forge-log').innerHTML+='❌ Fill all fields<br>'; return; }
+    try { new Function(code); document.getElementById('forge-log').innerHTML+=`✅ Build SUCCESS: ${name}<br>`; }
+    catch(e) { document.getElementById('forge-log').innerHTML+=`❌ Build FAILED: ${e.message}<br>`; }
 }
 function deployPlugin() {
-    const name = document.getElementById('forge-name').value.trim();
-    const id = document.getElementById('forge-id').value.trim();
-    const cat = document.getElementById('forge-category').value;
-    if(!name || !id) { forgeLog('❌ Name and ID required'); return; }
-    if(installedPlugins.find(p => p.id === id)) { forgeLog(`⚠️ Already installed`); return; }
-    forgeLog(`🚀 Deploying ${name}...`);
-    setTimeout(() => {
-        installedPlugins.push({ id, name, category: cat, status: 'active', version: '1.0.0' });
-        renderPluginList(); forgeLog(`✅ DEPLOYED: ${name} is now LIVE`); resetForgeForm();
-    }, 1000);
-}
-function resetForgeForm() {
-    document.getElementById('forge-name').value = '';
-    document.getElementById('forge-id').value = '';
-    document.getElementById('forge-code').value = '';
-    forgeLog('📋 Form cleared.');
+    const name=document.getElementById('forge-name').value, id=document.getElementById('forge-id').value, cat=document.getElementById('forge-category').value;
+    if(!name||!id) { document.getElementById('forge-log').innerHTML+=' Name & ID required<br>'; return; }
+    if(installedPlugins.find(p=>p.id===id)) { document.getElementById('forge-log').innerHTML+='️ Already exists<br>'; return; }
+    installedPlugins.push({id, name, category:cat, status:'active', version:'1.0.0'});
+    renderPluginList();
+    document.getElementById('forge-log').innerHTML+=` DEPLOYED: ${name}<br>`;
+    
+    // Auto-unlock sidebar
+    const item = document.querySelector(`.nav-item[data-plugin="${id}"]`);
+    if(item) { item.classList.remove('disabled'); const badge=item.querySelector('.plugin-badge'); if(badge){badge.textContent='ACTIVE';badge.classList.add('active');} }
+    
+    document.getElementById('forge-name').value=''; document.getElementById('forge-id').value=''; document.getElementById('forge-code').value='';
 }
 </script>
 </body>
