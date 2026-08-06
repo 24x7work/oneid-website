@@ -2,166 +2,275 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperLabHub v3.0 | Mother Cockpit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SuperLabHub v3.0 | Command Center</title>
     <style>
         :root {
-            --slh-bg: #FDF6E3;
-            --slh-text: #5C4B37;
-            --slh-accent: #D4A843;
-            --slh-success: #7BA05B;
-            --slh-danger: #C75B3A;
-            --slh-card: #FAF0DC;
+            --bg: #FDF6E3; --text: #5C4B37; --accent: #D4A843; --card: #FAF0DC;
+            --success: #7BA05B; --danger: #C75B3A; --border: #E6D5B8; --disabled: #ccc;
         }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--slh-bg); color: var(--slh-text); margin: 0; padding: 20px; line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { color: var(--slh-accent); text-align: center; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .tab { background: var(--slh-card); padding: 10px 20px; border-radius: 8px; cursor: pointer; white-space: nowrap; border: 1px solid transparent; }
-        .tab.active { border-color: var(--slh-accent); background: #F5E6C8; font-weight: bold; }
-        .panel { display: none; background: var(--slh-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .panel.active { display: block; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--slh-accent); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
-        button:active { transform: scale(0.98); }
-        .log-box { background: #2d2d2d; color: #00ff00; font-family: monospace; padding: 15px; border-radius: 8px; height: 200px; overflow-y: auto; margin-top: 15px; font-size: 14px; }
-        .stat-card { background: var(--slh-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* === LOGIN SCREEN === */
+        #login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .login-card { background: var(--card); padding: 40px 30px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .login-logo { font-size: 2em; margin-bottom: 10px; }
+        .login-title { font-size: 1.5em; color: var(--accent); margin-bottom: 25px; font-weight: bold; }
+        .auth-tabs { display: flex; gap: 5px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .auth-tab { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85em; white-space: nowrap; background: var(--bg); border: 1px solid var(--border); }
+        .auth-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .auth-input { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); font-size: 1em; margin-bottom: 15px; outline: none; }
+        .auth-input:focus { border-color: var(--accent); }
+        .login-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; }
+        .login-btn:active { transform: scale(0.98); }
+        .biometric-area { display: none; flex-direction: column; align-items: center; gap: 15px; }
+        .bio-icon { font-size: 3em; cursor: pointer; padding: 20px; background: var(--bg); border-radius: 50%; border: 2px dashed var(--accent); }
+        .mpin-dots { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
+        .dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--accent); }
+        .dot.filled { background: var(--accent); }
+
+        /* === DASHBOARD (Hidden until login) === */
+        #dashboard-screen { display: none; flex-direction: column; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar { width: 100%; background: var(--card); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 10px; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
+        .sidebar::-webkit-scrollbar { display: none; }
+        .logo { font-size: 1.1em; font-weight: bold; color: var(--accent); margin-right: 20px; display: flex; align-items: center; flex-shrink: 0; }
+        .nav-item { padding: 8px 15px; margin-right: 5px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9em; flex-shrink: 0; transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { background: var(--bg); color: var(--accent); font-weight: bold; }
+        .nav-item.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+        .nav-item.disabled:hover { background: transparent; color: var(--text); font-weight: normal; }
+        .plugin-badge { font-size: 0.6em; background: var(--accent); color: white; padding: 2px 5px; border-radius: 4px; margin-left: 5px; }
+
+        /* Sticky Top Bar */
+        .topbar { display: flex; flex-direction: column; gap: 10px; padding: 15px; background: var(--bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
+        .search-box { background: var(--card); padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: center; width: 100%; }
+        .search-box input { border: none; background: transparent; outline: none; width: 100%; color: var(--text); font-size: 1em; }
+        .top-icons { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
+        .icon-badge { background: var(--card); padding: 6px 12px; border-radius: 15px; display: flex; align-items: center; gap: 5px; font-size: 0.85em; white-space: nowrap; border: 1px solid var(--border); }
+
+        /* Dashboard Content */
+        .dashboard-content { padding: 15px; display: grid; grid-template-columns: 1fr; gap: 15px; flex: 1; }
+        .guts-brain { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
+        .flow-container { display: flex; justify-content: space-around; align-items: center; margin: 20px 0; }
+        .flow-item { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.8em; }
+        .flow-icon { font-size: 2em; }
+        .arrow { font-size: 1.5em; color: var(--accent); }
+        .stats-row { display: flex; justify-content: center; margin-top: 15px; font-size: 0.9em; background: var(--bg); padding: 10px; border-radius: 8px; }
+        .stat-val { font-weight: bold; color: var(--accent); }
+
+        .bottom-cards { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
+        .b-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+        .b-card h4 { color: var(--accent); margin-bottom: 10px; font-size: 1em; }
+
+        .right-panel { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--border); }
+        .yard-flow { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 15px; }
+        .yard-step { background: var(--bg); padding: 10px; border-radius: 8px; width: 100%; text-align: center; font-size: 0.9em; border: 1px solid var(--border); }
+
+        /* Floating Bot */
+        .qwen-bot { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; padding: 10px 15px; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; font-weight: bold; z-index: 200; font-size: 0.9em; }
+
+        /* Desktop */
+        @media (min-width: 768px) {
+            #dashboard-screen { flex-direction: row; }
+            .sidebar { width: 260px; flex-direction: column; overflow-y: auto; border-right: 1px solid var(--border); border-bottom: none; white-space: normal; padding: 20px; }
+            .nav-item { margin-right: 0; margin-bottom: 5px; width: 100%; }
+            .dashboard-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+            .topbar { flex-direction: row; justify-content: space-between; align-items: center; }
+            .search-box { width: 300px; }
+            .dashboard-content { grid-template-columns: 2fr 1fr; }
+            .bottom-cards { grid-template-columns: repeat(3, 1fr); }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1> SuperLabHub Mother Cockpit</h1>
-    
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('wallet')">💰 Wallet</div>
-        <div class="tab" onclick="switchTab('sms')"> SMS Engine</div>
-        <div class="tab" onclick="switchTab('projects')"> Projects</div>
-        <div class="tab" onclick="switchTab('logs')">📟 Live Logs</div>
-    </div>
+<!-- ==================== LOGIN SCREEN ==================== -->
+<div id="login-screen">
+    <div class="login-card">
+        <div class="login-logo">⚡</div>
+        <div class="login-title">SuperLabHub v3.0</div>
+        
+        <div class="auth-tabs">
+            <div class="auth-tab active" onclick="switchAuth('email')">📧 Email</div>
+            <div class="auth-tab" onclick="switchAuth('biometric')">👆 Biometric</div>
+            <div class="auth-tab" onclick="switchAuth('face')">📷 Face ID</div>
+            <div class="auth-tab" onclick="switchAuth('mpin')">🔢 MPIN</div>
+            <div class="auth-tab" onclick="switchAuth('pattern')">🔲 Pattern</div>
+        </div>
 
-    <!-- WALLET PANEL -->
-    <div id="wallet" class="panel active">
-        <h3>Virtual Wallet & Credit Engine</h3>
-        <div class="stat-card"><strong>Current Balance:</strong> <span id="balanceDisplay">₹0.00</span></div>
-        <div class="input-group">
-            <label>Recharge Amount ()</label>
-            <input type="number" id="rechargeAmount" placeholder="e.g. 1000">
+        <!-- Email Auth -->
+        <div id="auth-email" class="auth-form">
+            <input type="email" class="auth-input" placeholder="Email Address">
+            <input type="password" class="auth-input" placeholder="Password">
+            <button class="login-btn" onclick="doLogin()">🔓 Secure Login</button>
         </div>
-        <button onclick="rechargeWallet()"> Recharge Wallet</button>
-    </div>
 
-    <!-- SMS PANEL -->
-    <div id="sms" class="panel">
-        <h3>4-Tier SMS Hybrid Engine</h3>
-        <div class="input-group">
-            <label>Phone Number</label>
-            <input type="tel" id="smsPhone" placeholder="+919876543210">
+        <!-- Biometric Auth -->
+        <div id="auth-biometric" class="auth-form biometric-area" style="display:none;">
+            <div class="bio-icon" onclick="doLogin()">👆</div>
+            <p>Tap to authenticate with fingerprint</p>
         </div>
-        <div class="input-group">
-            <label>Select Tier</label>
-            <select id="smsTier">
-                <option value="SEA_WAVE">🌊 Sea Wave (Free, Test)</option>
-                <option value="SAND_FOOT_MARK">🏖️ Sand Foot Mark (24h Cache)</option>
-                <option value="NATIVE_OTP_BRIDGE">🌉 Native OTP Bridge (Paid, Instant)</option>
-                <option value="PERMANENT">📜 Permanent (DLT, Audit)</option>
-            </select>
-        </div>
-        <button onclick="sendSMS()"> Send SMS</button>
-    </div>
 
-    <!-- PROJECTS PANEL -->
-    <div id="projects" class="panel">
-        <h3>5 Project Modes Authority</h3>
-        <div class="input-group">
-            <label>Project Name</label>
-            <input type="text" id="projectName" placeholder="e.g. ONEID-Alpha">
+        <!-- Face ID Auth -->
+        <div id="auth-face" class="auth-form biometric-area" style="display:none;">
+            <div class="bio-icon" onclick="doLogin()">📷</div>
+            <p>Look at camera to unlock</p>
         </div>
-        <div class="input-group">
-            <label>Project Mode</label>
-            <select id="projectMode">
-                <option value="SURROGACY_CHILD">Surrogacy Child (Client Pay)</option>
-                <option value="OWN_CHILD">Own Child (Free Loopback)</option>
-                <option value="ADOPTED_CHILD">Adopted Child (Asset)</option>
-                <option value="CHICKEN_EGG">Chicken & Egg (Hybrid)</option>
-                <option value="PENETRATION_MODE">Penetration Mode</option>
-            </select>
-        </div>
-        <button onclick="createProject()">🐣 Birth Project</button>
-        <button onclick="triggerAdoption()" style="background: var(--slh-success); margin-top: 10px;">️ Run Adoption Scan</button>
-    </div>
 
-    <!-- LOGS PANEL -->
-    <div id="logs" class="panel">
-        <h3>System Activity Logs</h3>
-        <div class="log-box" id="logBox">Waiting for Mother Cockpit commands...</div>
+        <!-- MPIN Auth -->
+        <div id="auth-mpin" class="auth-form" style="display:none;">
+            <div class="mpin-dots"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div></div>
+            <input type="number" class="auth-input" placeholder="Enter 4-digit MPIN" maxlength="4" style="text-align:center; letter-spacing:10px; font-size:1.5em;">
+            <button class="login-btn" onclick="doLogin()">🔓 Verify MPIN</button>
+        </div>
+
+        <!-- Pattern Auth -->
+        <div id="auth-pattern" class="auth-form biometric-area" style="display:none;">
+            <div style="font-size:3em; cursor:pointer;" onclick="doLogin()">🔲</div>
+            <p>Draw your unlock pattern</p>
+        </div>
     </div>
 </div>
 
+<!-- ==================== DASHBOARD SCREEN ==================== -->
+<div id="dashboard-screen">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">⚡ SuperLabHub</div>
+        <div class="nav-item active" data-module="dashboard">📊 Dashboard</div>
+        <div class="nav-item disabled" data-plugin="migration">🔄 Migration<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item disabled" data-plugin="sql_editor">📱 SQL Editor<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item disabled" data-plugin="forge">🔌 Plugin Forge<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item disabled" data-plugin="projects">🗄️ Projects<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item" data-module="settings">⚙️ Settings</div>
+        <div class="nav-item disabled" data-plugin="connect">🌐 Connect<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item disabled" data-plugin="sandbox">🧪 Sandbox<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item" data-module="guide">📄 User Guide</div>
+        <div class="nav-item disabled" data-plugin="recycle">♻️ Recycle<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item disabled" data-plugin="find_replace">🔍 Find & Replace<span class="plugin-badge">PLUGIN</span></div>
+    </nav>
+
+    <!-- Dashboard Wrapper -->
+    <div class="dashboard-wrapper">
+        <!-- Sticky Top Bar -->
+        <header class="topbar">
+            <div class="search-box">🔍 <input type="text" placeholder="Search modules..."></div>
+            <div class="top-icons">
+                <div class="icon-badge">📱 QR: Active</div>
+                <div class="icon-badge">💰 ₹2,450</div>
+                <div class="icon-badge" onclick="logout()" style="cursor:pointer;">🚪 Logout</div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <div class="center-panel">
+                <!-- Guts Brain -->
+                <div class="guts-brain">
+                    <h3 style="color:var(--accent); margin-bottom:10px;">GUTS BRAIN | REEs Refinery</h3>
+                    <div class="flow-container">
+                        <div class="flow-item"><div class="flow-icon">🪨</div>Raw Data<br><span class="stat-val">12.4 TB</span></div>
+                        <div class="arrow">➡️</div>
+                        <div class="flow-item"><div class="flow-icon">🧠</div>Guts Brain<br><span style="font-size:0.8em">Processing</span></div>
+                        <div class="arrow">➡️</div>
+                        <div class="flow-item"><div class="flow-icon">💎</div>REEs<br><span class="stat-val">340 MB</span></div>
+                    </div>
+                    <div class="stats-row">Waste Recycled: <span class="stat-val">94.7%</span></div>
+                </div>
+
+                <!-- Bottom Cards -->
+                <div class="bottom-cards">
+                    <div class="b-card">
+                        <h4>⚡ Fuel Core</h4>
+                        <div style="margin-top:10px; font-size:0.9em;">🌊 Sea Wave: <span style="color:#4A90E2">██████</span></div>
+                        <div style="margin-top:5px; font-size:0.9em;">🏖️ Sand Foot: <span style="color:#D4A843">███</span></div>
+                        <div style="margin-top:5px; font-size:0.9em;">📜 Normal: <span style="color:#7BA05B">█</span></div>
+                    </div>
+                    <div class="b-card">
+                        <h4>🌐 SLH Connect</h4>
+                        <div style="display:flex; justify-content:space-around; margin-top:15px; font-size:1.5em;">👔 — 👨‍💻 — 👤</div>
+                        <div style="text-align:center; font-size:0.8em; margin-top:5px;">Admin • Dev • Client</div>
+                    </div>
+                    <div class="b-card">
+                        <h4>📈 Storage ROI</h4>
+                        <div style="font-size:1.5em; font-weight:bold; color:var(--success); margin-top:10px;">$128/mo</div>
+                        <div style="font-size:0.9em;">94.7% storage saved</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <h4 style="color:var(--accent);">Free Dumping Yard</h4>
+                <div class="yard-flow">
+                    <div class="yard-step">✅ Device Cache</div>
+                    <div style="font-size:1.5em; color:var(--accent);">⬇️</div>
+                    <div class="yard-step">☁️ Free Cloud Tier</div>
+                    <div style="font-size:1.5em; color:var(--accent);">⬇️</div>
+                    <div class="yard-step">🗄️ Client DB</div>
+                </div>
+                <div style="margin-top:20px; padding:15px; background:var(--bg); border-radius:8px; text-align:center; font-size:0.9em; border:1px dashed var(--accent);">
+                    🔍 Hyper-Pinpoint<br><strong>Find & Replace Engine</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating AI Bot -->
+<div class="qwen-bot" onclick="alert('Qwen Quick Help: How can I assist you?')">🤖 Ask Qwen</div>
+
 <script>
-    let balance = 0;
-    const logBox = document.getElementById('logBox');
-    const balanceDisplay = document.getElementById('balanceDisplay');
+// === JSON PLUGIN CONFIG (Simulated) ===
+const PLUGIN_CONFIG = {
+    migration: false, sql_editor: false, forge: false, projects: false,
+    connect: false, sandbox: false, recycle: false, find_replace: false
+};
 
-    function log(msg, type = 'info') {
-        const color = type === 'success' ? '#00ff00' : type === 'error' ? '#ff4444' : '#00ff00';
-        const time = new Date().toLocaleTimeString();
-        logBox.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
-        logBox.scrollTop = logBox.scrollHeight;
-    }
+// === AUTH SYSTEM ===
+function switchAuth(type) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    document.querySelectorAll('.auth-form').forEach(f => f.style.display = 'none');
+    const formMap = { email:'auth-email', biometric:'auth-biometric', face:'auth-face', mpin:'auth-mpin', pattern:'auth-pattern' };
+    const el = document.getElementById(formMap[type]);
+    if(el) el.style.display = type === 'email' || type === 'mpin' ? 'block' : 'flex';
+}
 
-    function switchTab(tabId) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.target.classList.add('active');
-    }
+function doLogin() {
+    // Simulate auth verification
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard-screen').style.display = 'flex';
+    initPlugins();
+}
 
-    function rechargeWallet() {
-        const amount = parseFloat(document.getElementById('rechargeAmount').value);
-        if (!amount || amount <= 0) return log('❌ Invalid amount', 'error');
-        balance += amount;
-        balanceDisplay.innerText = `₹${balance.toFixed(2)}`;
-        log(`✅ [WALLET] Recharged ₹${amount}. New Balance: ₹${balance.toFixed(2)}`, 'success');
-    }
+function logout() {
+    document.getElementById('dashboard-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+}
 
-    function sendSMS() {
-        const phone = document.getElementById('smsPhone').value;
-        const tier = document.getElementById('smsTier').value;
-        if (!phone) return log('❌ Phone number required', 'error');
-
-        const costs = { SEA_WAVE: 0, SAND_FOOT_MARK: 0.05, NATIVE_OTP_BRIDGE: 0.30, PERMANENT: 0.20 };
-        const cost = costs[tier];
-
-        if (tier !== 'SEA_WAVE' && balance < cost) {
-            return log(`❌ [SMS] Insufficient balance for ${tier}. Need ₹${cost}`, 'error');
+// === PLUGIN ACTIVATION SYSTEM ===
+function initPlugins() {
+    document.querySelectorAll('.nav-item[data-plugin]').forEach(item => {
+        const pluginKey = item.getAttribute('data-plugin');
+        if (PLUGIN_CONFIG[pluginKey]) {
+            item.classList.remove('disabled');
+            item.querySelector('.plugin-badge').textContent = 'ACTIVE';
+            item.querySelector('.plugin-badge').style.background = '#7BA05B';
         }
+    });
+}
 
-        balance -= cost;
-        balanceDisplay.innerText = `₹${balance.toFixed(2)}`;
-        log(`✅ [SMS] Sent via ${tier} to ${phone}. Cost: ₹${cost}`, 'success');
-    }
-
-    function createProject() {
-        const name = document.getElementById('projectName').value;
-        const mode = document.getElementById('projectMode').value;
-        if (!name) return log('❌ Project name required', 'error');
-        
-        log(`🐣 [PROJECT] Born: "${name}" in ${mode} mode.`, 'success');
-        if (mode === 'OWN_CHILD' || mode === 'ADOPTED_CHILD') {
-            log(`💡 [LOOPBACK] Free mode activated. Zero billing applied.`, 'info');
-        }
-    }
-
-    function triggerAdoption() {
-        log('♻️ [ADOPTION] Scanning for orphaned assets...', 'info');
-        setTimeout(() => {
-            log(`✅ [ADOPTION] Scan complete. 0 Orphans found. Zero Waste Policy Active.`, 'success');
-        }, 1000);
-    }
+// === SIDEBAR NAVIGATION ===
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+        if (this.classList.contains('disabled')) return;
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+    });
+});
 </script>
-
 </body>
 </html>
