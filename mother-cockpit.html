@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperLabHub v3.0 | Mother Cockpit</title>
+    <style>
+        :root {
+            --slh-bg: #FDF6E3;
+            --slh-text: #5C4B37;
+            --slh-accent: #D4A843;
+            --slh-success: #7BA05B;
+            --slh-danger: #C75B3A;
+            --slh-card: #FAF0DC;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--slh-bg); color: var(--slh-text); margin: 0; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { color: var(--slh-accent); text-align: center; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab { background: var(--slh-card); padding: 10px 20px; border-radius: 8px; cursor: pointer; white-space: nowrap; border: 1px solid transparent; }
+        .tab.active { border-color: var(--slh-accent); background: #F5E6C8; font-weight: bold; }
+        .panel { display: none; background: var(--slh-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .panel.active { display: block; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+        button { background: var(--slh-accent); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+        button:active { transform: scale(0.98); }
+        .log-box { background: #2d2d2d; color: #00ff00; font-family: monospace; padding: 15px; border-radius: 8px; height: 200px; overflow-y: auto; margin-top: 15px; font-size: 14px; }
+        .stat-card { background: var(--slh-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1> SuperLabHub Mother Cockpit</h1>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('wallet')">💰 Wallet</div>
+        <div class="tab" onclick="switchTab('sms')"> SMS Engine</div>
+        <div class="tab" onclick="switchTab('projects')"> Projects</div>
+        <div class="tab" onclick="switchTab('logs')">📟 Live Logs</div>
+    </div>
+
+    <!-- WALLET PANEL -->
+    <div id="wallet" class="panel active">
+        <h3>Virtual Wallet & Credit Engine</h3>
+        <div class="stat-card"><strong>Current Balance:</strong> <span id="balanceDisplay">₹0.00</span></div>
+        <div class="input-group">
+            <label>Recharge Amount ()</label>
+            <input type="number" id="rechargeAmount" placeholder="e.g. 1000">
+        </div>
+        <button onclick="rechargeWallet()"> Recharge Wallet</button>
+    </div>
+
+    <!-- SMS PANEL -->
+    <div id="sms" class="panel">
+        <h3>4-Tier SMS Hybrid Engine</h3>
+        <div class="input-group">
+            <label>Phone Number</label>
+            <input type="tel" id="smsPhone" placeholder="+919876543210">
+        </div>
+        <div class="input-group">
+            <label>Select Tier</label>
+            <select id="smsTier">
+                <option value="SEA_WAVE">🌊 Sea Wave (Free, Test)</option>
+                <option value="SAND_FOOT_MARK">🏖️ Sand Foot Mark (24h Cache)</option>
+                <option value="NATIVE_OTP_BRIDGE">🌉 Native OTP Bridge (Paid, Instant)</option>
+                <option value="PERMANENT">📜 Permanent (DLT, Audit)</option>
+            </select>
+        </div>
+        <button onclick="sendSMS()"> Send SMS</button>
+    </div>
+
+    <!-- PROJECTS PANEL -->
+    <div id="projects" class="panel">
+        <h3>5 Project Modes Authority</h3>
+        <div class="input-group">
+            <label>Project Name</label>
+            <input type="text" id="projectName" placeholder="e.g. ONEID-Alpha">
+        </div>
+        <div class="input-group">
+            <label>Project Mode</label>
+            <select id="projectMode">
+                <option value="SURROGACY_CHILD">Surrogacy Child (Client Pay)</option>
+                <option value="OWN_CHILD">Own Child (Free Loopback)</option>
+                <option value="ADOPTED_CHILD">Adopted Child (Asset)</option>
+                <option value="CHICKEN_EGG">Chicken & Egg (Hybrid)</option>
+                <option value="PENETRATION_MODE">Penetration Mode</option>
+            </select>
+        </div>
+        <button onclick="createProject()">🐣 Birth Project</button>
+        <button onclick="triggerAdoption()" style="background: var(--slh-success); margin-top: 10px;">️ Run Adoption Scan</button>
+    </div>
+
+    <!-- LOGS PANEL -->
+    <div id="logs" class="panel">
+        <h3>System Activity Logs</h3>
+        <div class="log-box" id="logBox">Waiting for Mother Cockpit commands...</div>
+    </div>
+</div>
+
+<script>
+    let balance = 0;
+    const logBox = document.getElementById('logBox');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+
+    function log(msg, type = 'info') {
+        const color = type === 'success' ? '#00ff00' : type === 'error' ? '#ff4444' : '#00ff00';
+        const time = new Date().toLocaleTimeString();
+        logBox.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function rechargeWallet() {
+        const amount = parseFloat(document.getElementById('rechargeAmount').value);
+        if (!amount || amount <= 0) return log('❌ Invalid amount', 'error');
+        balance += amount;
+        balanceDisplay.innerText = `₹${balance.toFixed(2)}`;
+        log(`✅ [WALLET] Recharged ₹${amount}. New Balance: ₹${balance.toFixed(2)}`, 'success');
+    }
+
+    function sendSMS() {
+        const phone = document.getElementById('smsPhone').value;
+        const tier = document.getElementById('smsTier').value;
+        if (!phone) return log('❌ Phone number required', 'error');
+
+        const costs = { SEA_WAVE: 0, SAND_FOOT_MARK: 0.05, NATIVE_OTP_BRIDGE: 0.30, PERMANENT: 0.20 };
+        const cost = costs[tier];
+
+        if (tier !== 'SEA_WAVE' && balance < cost) {
+            return log(`❌ [SMS] Insufficient balance for ${tier}. Need ₹${cost}`, 'error');
+        }
+
+        balance -= cost;
+        balanceDisplay.innerText = `₹${balance.toFixed(2)}`;
+        log(`✅ [SMS] Sent via ${tier} to ${phone}. Cost: ₹${cost}`, 'success');
+    }
+
+    function createProject() {
+        const name = document.getElementById('projectName').value;
+        const mode = document.getElementById('projectMode').value;
+        if (!name) return log('❌ Project name required', 'error');
+        
+        log(`🐣 [PROJECT] Born: "${name}" in ${mode} mode.`, 'success');
+        if (mode === 'OWN_CHILD' || mode === 'ADOPTED_CHILD') {
+            log(`💡 [LOOPBACK] Free mode activated. Zero billing applied.`, 'info');
+        }
+    }
+
+    function triggerAdoption() {
+        log('♻️ [ADOPTION] Scanning for orphaned assets...', 'info');
+        setTimeout(() => {
+            log(`✅ [ADOPTION] Scan complete. 0 Orphans found. Zero Waste Policy Active.`, 'success');
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
