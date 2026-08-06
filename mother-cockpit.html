@@ -124,7 +124,13 @@
                 <div class="forge-form">
                     <input type="text" id="forge-name" placeholder="Plugin Name">
                     <input type="text" id="forge-id" placeholder="Plugin ID">
-                    <select id="forge-category"><option>Revenue / Billing</option><option>Data / Analytics</option><option>Utility / Tools</option></select>
+                    <select id="forge-category">
+    <option>Revenue / Billing</option>
+    <option>Data / Analytics</option>
+    <option>Utility / Tools</option>
+    <option>Security / Auth</option>
+    <option>Communication / SMS</option>
+</select>
                     <textarea id="forge-code" placeholder="// Plugin code here"></textarea>
                     <button class="forge-btn success" onclick="buildPlugin()">🔨 Build & Test</button>
                     <button class="forge-btn primary" onclick="deployPlugin()">🚀 Deploy</button>
