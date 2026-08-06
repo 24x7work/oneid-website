@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SuperLabHub v3.0 | Command Center</title>
     <style>
-        :root { --bg: #FDF6E3; --text: #5C4B37; --accent: #D4A843; --card: #FAF0DC; --success: #7BA05B; --danger: #C75B3A; --border: #E6D5B8; }
+        :root { --bg: #FDF6E3; --text: #5C4B37; --accent: #D4A843; --card: #FAF0DC; --success: #7BA05B; --border: #E6D5B8; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; }
         #login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .login-card { background: var(--card); padding: 40px 30px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
-        .login-logo { font-size: 2em; margin-bottom: 10px; }
         .login-title { font-size: 1.5em; color: var(--accent); margin-bottom: 25px; font-weight: bold; }
         .auth-tabs { display: flex; gap: 5px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
         .auth-tab { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85em; white-space: nowrap; background: var(--bg); border: 1px solid var(--border); }
@@ -43,8 +42,7 @@
         .forge-btn.primary { background: var(--accent); color: white; }
         .forge-btn.success { background: var(--success); color: white; }
         .plugin-item { background: var(--bg); padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .plugin-status { padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: bold; }
-        .plugin-status.active { background: var(--success); color: white; }
+        .plugin-status { padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: bold; background: var(--success); color: white; }
         .forge-log { background: #2d2d2d; color: #00ff00; padding: 15px; border-radius: 8px; height: 150px; overflow-y: auto; margin-top: 15px; font-family: monospace; font-size: 0.8em; }
         @media (min-width: 768px) {
             body { display: flex; }
@@ -59,8 +57,7 @@
 <body>
 <div id="login-screen">
     <div class="login-card">
-        <div class="login-logo">⚡</div>
-        <div class="login-title">SuperLabHub v3.0</div>
+        <div class="login-title">⚡ SuperLabHub v3.0</div>
         <div class="auth-tabs">
             <div class="auth-tab active" onclick="switchAuth('email')">📧 Email</div>
             <div class="auth-tab" onclick="switchAuth('biometric')">👆 Biometric</div>
@@ -68,23 +65,23 @@
         </div>
         <div id="auth-email"><input type="email" class="auth-input" placeholder="Email"><input type="password" class="auth-input" placeholder="Password"><button class="login-btn" onclick="doLogin()"> Login</button></div>
         <div id="auth-biometric" style="display:none;"><div style="font-size:3em;cursor:pointer;" onclick="doLogin()">👆</div></div>
-        <div id="auth-mpin" style="display:none;"><input type="number" class="auth-input" placeholder="MPIN" maxlength="4"><button class="login-btn" onclick="doLogin()"> Verify</button></div>
+        <div id="auth-mpin" style="display:none;"><input type="number" class="auth-input" placeholder="MPIN" maxlength="4"><button class="login-btn" onclick="doLogin()">🔓 Verify</button></div>
     </div>
 </div>
 
 <div id="dashboard-screen" style="display:none;flex-direction:column;min-height:100vh;">
     <nav class="sidebar">
-        <div class="logo">⚡ SuperLabHub</div>
+        <div class="logo"> SuperLabHub</div>
         <div class="nav-item active" onclick="showModule('dashboard')">📊 Dashboard</div>
-        <div class="nav-item disabled" data-plugin="migration" onclick="showPlugin('migration')">🔄 Migration<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item disabled" data-plugin="sql_editor" onclick="showPlugin('sql_editor')"> SQL Editor<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item" data-plugin="forge" onclick="showPlugin('forge')">🔌 Plugin Forge<span class="plugin-badge active">ACTIVE</span></div>
-        <div class="nav-item" data-plugin="projects" onclick="showPlugin('projects')">🗄️ Projects<span class="plugin-badge active">ACTIVE</span></div>
-        <div class="nav-item" data-module="settings" onclick="showModule('settings')">️ Settings</div>
-        <div class="nav-item disabled" data-plugin="sandbox" onclick="showPlugin('sandbox')">🧪 Sandbox<span class="plugin-badge">PLUGIN</span></div>
+        <div class="nav-item" data-plugin="migration" onclick="showModule('migration')">🔄 Migration<span class="plugin-badge active">ACTIVE</span></div>
+        <div class="nav-item" data-plugin="sql_editor" onclick="showModule('sql_editor')"> SQL Editor<span class="plugin-badge active">ACTIVE</span></div>
+        <div class="nav-item" data-plugin="forge" onclick="showModule('forge')">🔌 Plugin Forge<span class="plugin-badge active">ACTIVE</span></div>
+        <div class="nav-item" data-plugin="projects" onclick="showModule('projects')">🗄️ Projects<span class="plugin-badge active">ACTIVE</span></div>
+        <div class="nav-item" data-module="settings" onclick="showModule('settings')">⚙️ Settings</div>
+        <div class="nav-item" data-plugin="sandbox" onclick="showModule('sandbox')">🧪 Sandbox<span class="plugin-badge active">ACTIVE</span></div>
         <div class="nav-item" data-module="guide" onclick="showModule('guide')">📄 Guide</div>
-        <div class="nav-item disabled" data-plugin="recycle" onclick="showPlugin('recycle')">♻️ Recycle<span class="plugin-badge">PLUGIN</span></div>
-        <div class="nav-item" data-plugin="find_replace" onclick="showPlugin('find_replace')">🔍 Find & Replace<span class="plugin-badge active">ACTIVE</span></div>
+        <div class="nav-item" data-plugin="recycle" onclick="showModule('recycle')">♻️ Recycle<span class="plugin-badge active">ACTIVE</span></div>
+        <div class="nav-item" data-plugin="find_replace" onclick="showModule('find_replace')">🔍 Find & Replace<span class="plugin-badge active">ACTIVE</span></div>
     </nav>
     <div style="flex:1;display:flex;flex-direction:column;">
         <header class="topbar">
@@ -92,9 +89,11 @@
             <div class="top-icons">
                 <div class="icon-badge">📱 QR: Active</div>
                 <div class="icon-badge">💰 ₹2,450</div>
-                <div class="icon-badge" onclick="logout()">🚪 Logout</div>
+                <div class="icon-badge" onclick="logout()"> Logout</div>
             </div>
         </header>
+        
+        <!-- DASHBOARD VIEW -->
         <div id="view-dashboard" class="dashboard-content">
             <div>
                 <div class="guts-brain">
@@ -104,46 +103,56 @@
                         <div style="font-size:2em;color:var(--accent);">➡️</div>
                         <div class="flow-item">🧠<br>Brain<br>Processing</div>
                         <div style="font-size:2em;color:var(--accent);">➡️</div>
-                        <div class="flow-item"><br>REEs<br><span class="stat-val">340 MB</span></div>
+                        <div class="flow-item">💎<br>REEs<br><span class="stat-val">340 MB</span></div>
                     </div>
                 </div>
                 <div class="bottom-cards" style="margin-top:15px;">
-                    <div class="b-card"><h4>⚡ Fuel Core</h4><p>🌊 Sea Wave | 🏖️ Sand Foot | 📜 Normal</p></div>
-                    <div class="b-card"><h4>🌐 SLH Connect</h4><p>👔 — 👨‍💻 — 👤</p></div>
+                    <div class="b-card"><h4>⚡ Fuel Core</h4><p>🌊 Sea Wave | ️ Sand Foot | 📜 Normal</p></div>
+                    <div class="b-card"><h4>🌐 SLH Connect</h4><p>👔 — 👨‍ — 👤</p></div>
                     <div class="b-card"><h4>📈 Storage ROI</h4><p style="color:var(--success);font-weight:bold;">$128/mo Saved</p></div>
                 </div>
             </div>
-            <div style="background:var(--card);padding:20px;border-radius:15px;"><h4 style="color:var(--accent);">Free Dumping Yard</h4><p>✅ Cache → ☁️ Cloud → 🗄️ DB</p></div>
+            <div style="background:var(--card);padding:20px;border-radius:15px;"><h4 style="color:var(--accent);">Free Dumping Yard</h4><p>✅ Cache → ☁️ Cloud → ️ DB</p></div>
         </div>
+
+        <!-- ALL MODULE VIEWS -->
+        <div id="view-migration" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">🔄 Migration Converter</h2><p style="margin-top:15px;">Legacy data migration engine active. Ready to convert SQL/NoSQL schemas.</p></div></div>
+        <div id="view-sql_editor" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">📱 SQL Editor</h2><p style="margin-top:15px;">Secure query execution environment. Sandboxed for safety.</p></div></div>
         <div id="view-forge" class="module-view">
             <div class="forge-container">
                 <h2 style="color:var(--accent);margin-bottom:15px;">🔌 Plugin Forge</h2>
                 <div class="forge-form">
-                    <input type="text" id="forge-name" placeholder="Plugin Name (e.g. Invoice Generator)">
-                    <input type="text" id="forge-id" placeholder="Plugin ID (e.g. invoice_gen)">
+                    <input type="text" id="forge-name" placeholder="Plugin Name">
+                    <input type="text" id="forge-id" placeholder="Plugin ID">
                     <select id="forge-category"><option>Revenue / Billing</option><option>Data / Analytics</option><option>Utility / Tools</option></select>
-                    <textarea id="forge-code" placeholder="// Plugin code here&#10;function init() { console.log('Loaded'); }"></textarea>
+                    <textarea id="forge-code" placeholder="// Plugin code here"></textarea>
                     <button class="forge-btn success" onclick="buildPlugin()">🔨 Build & Test</button>
                     <button class="forge-btn primary" onclick="deployPlugin()">🚀 Deploy</button>
                 </div>
                 <h3 style="margin-top:20px;color:var(--accent);">Installed Plugins</h3>
                 <div id="plugin-list"></div>
-                <div class="forge-log" id="forge-log">[FORGE] Ready...</div>
+                <div class="forge-log" id="forge-log">[FORGE] All systems operational...</div>
             </div>
         </div>
-        <div id="view-projects" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">🗄️ Projects & DBs</h2><p style="margin-top:15px;">Project management module loaded.</p></div></div>
-        <div id="view-find_replace" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">🔍 Find & Replace</h2><p style="margin-top:15px;">Hyper-pinpoint engine active.</p></div></div>
-        <div id="view-settings" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">⚙️ Settings</h2><p style="margin-top:15px;">Configuration panel.</p></div></div>
-        <div id="view-guide" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">📄 User Guide</h2><p style="margin-top:15px;">Documentation.</p></div></div>
+        <div id="view-projects" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">🗄️ Projects & DBs</h2><p style="margin-top:15px;">Surrogacy, Own Child, and Adopted Child project management active.</p></div></div>
+        <div id="view-sandbox" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">🧪 Meta-Sandbox & IP Vault</h2><p style="margin-top:15px;">Isolated execution environment. Genesis Lock integrity: 100%.</p></div></div>
+        <div id="view-recycle" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">♻️ Data & Recycle Management</h2><p style="margin-top:15px;">Zero Waste Policy active. Free Dumping Yard routing operational.</p></div></div>
+        <div id="view-find_replace" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">🔍 Find & Replace Engine</h2><p style="margin-top:15px;">Hyper-pinpoint AST-level scanning active.</p></div></div>
+        <div id="view-settings" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">⚙️ Settings</h2><p style="margin-top:15px;">Global configuration and theme management.</p></div></div>
+        <div id="view-guide" class="module-view"><div class="forge-container"><h2 style="color:var(--accent);">📄 User Guide</h2><p style="margin-top:15px;">Documentation and tutorials.</p></div></div>
     </div>
 </div>
 
 <script>
-const PLUGIN_CONFIG = { migration:false, sql_editor:false, forge:true, projects:true, sandbox:false, recycle:false, find_replace:true };
+const PLUGIN_CONFIG = { migration:true, sql_editor:true, forge:true, projects:true, sandbox:true, recycle:true, find_replace:true };
 let installedPlugins = [
     {id:'forge', name:'Plugin Forge', category:'utility', status:'active', version:'1.0.0'},
     {id:'projects', name:'Projects & DBs', category:'data', status:'active', version:'1.0.0'},
-    {id:'find_replace', name:'Find & Replace Engine', category:'utility', status:'active', version:'1.0.0'}
+    {id:'find_replace', name:'Find & Replace Engine', category:'utility', status:'active', version:'1.0.0'},
+    {id:'migration', name:'Migration Converter', category:'data', status:'active', version:'1.0.0'},
+    {id:'sql_editor', name:'SQL Editor', category:'utility', status:'active', version:'1.0.0'},
+    {id:'sandbox', name:'Meta-Sandbox', category:'security', status:'active', version:'1.0.0'},
+    {id:'recycle', name:'Recycle Manager', category:'data', status:'active', version:'1.0.0'}
 ];
 
 function switchAuth(type) {
@@ -162,13 +171,8 @@ function showModule(name) {
     document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
     event.currentTarget.classList.add('active');
 }
-function showPlugin(name) {
-    const el = document.querySelector(`.nav-item[data-plugin="${name}"]`);
-    if(el && el.classList.contains('disabled')) return;
-    showModule(name);
-}
 function renderPluginList() {
-    document.getElementById('plugin-list').innerHTML = installedPlugins.map(p=>`<div class="plugin-item"><div><strong>${p.name}</strong><br><small>${p.category} • v${p.version}</small></div><span class="plugin-status active">ACTIVE</span></div>`).join('');
+    document.getElementById('plugin-list').innerHTML = installedPlugins.map(p=>`<div class="plugin-item"><div><strong>${p.name}</strong><br><small>${p.category} • v${p.version}</small></div><span class="plugin-status">ACTIVE</span></div>`).join('');
 }
 function buildPlugin() {
     const name=document.getElementById('forge-name').value, id=document.getElementById('forge-id').value, code=document.getElementById('forge-code').value;
@@ -183,11 +187,6 @@ function deployPlugin() {
     installedPlugins.push({id, name, category:cat, status:'active', version:'1.0.0'});
     renderPluginList();
     document.getElementById('forge-log').innerHTML+=` DEPLOYED: ${name}<br>`;
-    
-    // Auto-unlock sidebar
-    const item = document.querySelector(`.nav-item[data-plugin="${id}"]`);
-    if(item) { item.classList.remove('disabled'); const badge=item.querySelector('.plugin-badge'); if(badge){badge.textContent='ACTIVE';badge.classList.add('active');} }
-    
     document.getElementById('forge-name').value=''; document.getElementById('forge-id').value=''; document.getElementById('forge-code').value='';
 }
 </script>
